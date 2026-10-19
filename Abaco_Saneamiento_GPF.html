@@ -1,0 +1,1192 @@
+<!doctype html>
+<html lang="es" data-mode="grav">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ábaco Saneamiento GPF</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ábaco Saneamiento GPF">
+<meta name="theme-color" content="#17243D">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media=&#39;all&#39;">
+<style>
+[hidden]{display:none!important}
+.tabs{overflow-x:auto;scrollbar-width:thin} .tab{white-space:nowrap}
+[data-mode="mec"] .grav-only,[data-mode="mec"] .pres-only,[data-mode="mec"] .flow-only,[data-mode="grav"] .mec-only,[data-mode="pres"] .mec-only,[data-mode="flow"] .mec-only,
+[data-mode="mec"] .chart-panel,[data-mode="mec"] #results,[data-mode="mec"] #tabletitle,[data-mode="mec"] .tablewrap,[data-mode="mec"] #foot{display:none!important}
+:root{--soil:#C9B48F;--soil2:#E6D9BD;--trench:#EFE6D2;--water:#3E7CB1}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--soil:#6E5E44;--soil2:#4A4030;--trench:#3A3428;--water:#6FA6D6}}
+:root[data-theme="dark"]{--soil:#6E5E44;--soil2:#4A4030;--trench:#3A3428;--water:#6FA6D6}
+.row4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mecpanel{align-self:start;padding:14px 16px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.mverdict{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.mverdict .pill{font-family:"Archivo";font-weight:700;font-size:16px;padding:6px 14px;border-radius:999px}
+.mverdict.ok .pill{background:var(--ok-bg);color:var(--ok)} .mverdict.ko .pill{background:var(--crit-bg);color:var(--crit)}
+.mverdict .why{font-size:14px;flex:1 1 240px;min-width:0}
+.mkpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+@media (max-width:640px){.mkpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mkpis .tile.bad .v{color:var(--crit)}
+.mtwo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:1100px){.mtwo{grid-template-columns:minmax(0,1fr)}}
+.mtwo h3{font-size:14px;font-weight:600;margin-bottom:8px}
+.mchk{display:flex;flex-direction:column;gap:5px}
+.mchk div{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;font-size:13.5px}
+.mchk .dot{width:9px;height:9px;border-radius:50%} .mchk .dot.ok{background:var(--ok)} .mchk .dot.ko{background:var(--crit)}
+.mchk .val{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+.mchk .lim{font-family:"JetBrains Mono",monospace;color:var(--muted);font-size:12px}
+.mtag{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:0 5px}
+#msec text{font-family:"JetBrains Mono",monospace;font-size:11px}
+#mdet tr.grp td{font-family:"Archivo";font-weight:600;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:var(--panel2)}
+#mdet td:first-child{font-weight:400}
+.mnote{font-size:12.5px;color:var(--muted)}
+.mtable details summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink)}
+
+:root:not([data-mecsrc="pres"]) .mpres{display:none!important}
+[data-mecsrc="pres"] .mgrav{display:none!important}
+[data-mode="mec"] .mtable .tablewrap{display:block!important}
+.mwarn{font-size:13px;color:var(--warn,#8a5a00);background:var(--warn-bg,#fff4dc);border-radius:6px;padding:8px 12px;margin:0}
+.mprop summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);margin:6px 0}
+.mprintbtn{margin-left:auto;width:auto!important;padding:6px 12px!important;font-size:13px!important}
+.mprint{display:none}
+@media print{
+  body{background:#fff!important}
+  .tabs,aside,#errbox,.mprintbtn,.mbar,#curvesbtn,#dialprint,.dial-keys{display:none!important}
+  [data-mode="mec"] .chart-panel,[data-mode="mec"] #results,[data-mode="mec"] #foot,[data-mode="mec"] footer,[data-mode="mec"] .sub,[data-mode="mec"] .legend{display:none!important}
+  .dial-panel,.results,.tablewrap{break-inside:avoid}
+  .layout{display:block!important}
+  .mecpanel{border:0!important;box-shadow:none!important;padding:0!important}
+  .mprint{display:block!important;margin-bottom:6px}
+  .mprint h2{font-size:16px;margin:0 0 4px} .mprint p{font-size:12px;margin:0 0 8px}
+  .mprint table{width:100%;border-collapse:collapse;font-size:11.5px} .mprint th{text-align:left;width:28%;padding:3px 6px;border-bottom:1px solid #ccc;vertical-align:top} .mprint td{padding:3px 6px;border-bottom:1px solid #ccc}
+  .mtwo{grid-template-columns:1fr 1fr!important} details>summary{list-style:none}
+}
+aside .field,aside .row2>*{min-width:0} aside select,aside input{min-width:0;max-width:100%} aside{min-width:0}
+input[type=text]{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%;font-size:14px}
+.mdisc{font-size:10.5px;color:#555;margin-top:6px!important}
+.mbar{display:none}
+@media (max-width:900px){[data-mode="mec"] .mbar{display:block;position:fixed;left:12px;right:12px;bottom:12px;z-index:50;border:0;border-radius:999px;padding:10px 16px;font:600 15px "Archivo",sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer}
+ .mbar.ok{background:var(--ok-bg);color:var(--ok)} .mbar.ko{background:var(--crit-bg);color:var(--crit)} [data-mode="mec"] body{padding-bottom:70px}}
+@media print{.mbar{display:none!important}}
+:root{
+  --bg:#F4F5F7; --panel:#FFFFFF; --panel2:#EDEFF3; --ink:#17243D; --text:#1F2A3C; --muted:#5B6678; --line:#D6DAE2; --grid:#E4E7ED;
+  --brand:#E1261D; --brand-ink:#FFFFFF; --brand-soft:#FBE4E2; --navy:#17243D;
+  --r1:#C5CEDC; --r2:#9EACC2; --r3:#7A8CA8; --r4:#56698A; --r5:#36486B; --r6:#17243D;
+  --ok:#1E7A45; --warn:#A86A12; --crit:#8A2E0F; --ok-bg:#E1F1E7; --warn-bg:#F8EBD3; --crit-bg:#F7E1D7;
+  --focus:#36486B;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#121821; --panel:#1B2331; --panel2:#242E3E; --ink:#EEF1F6; --text:#E3E8EF; --muted:#9AA6B8; --line:#33405A; --grid:#27324A;
+  --brand:#F04B3F; --brand-ink:#121821; --brand-soft:#42221F; --navy:#EEF1F6;
+  --r1:#3A4A66; --r2:#4E607F; --r3:#66799A; --r4:#8497B6; --r5:#A6B6CF; --r6:#CBD6E6;
+  --ok:#5CC38A; --warn:#E3B04E; --crit:#F0906A; --ok-bg:#1B3327; --warn-bg:#3A3018; --crit-bg:#3F261C;
+  --focus:#A6B6CF;
+}}
+:root[data-theme="dark"]{
+  --bg:#121821; --panel:#1B2331; --panel2:#242E3E; --ink:#EEF1F6; --text:#E3E8EF; --muted:#9AA6B8; --line:#33405A; --grid:#27324A;
+  --brand:#F04B3F; --brand-ink:#121821; --brand-soft:#42221F; --navy:#EEF1F6;
+  --r1:#3A4A66; --r2:#4E607F; --r3:#66799A; --r4:#8497B6; --r5:#A6B6CF; --r6:#CBD6E6;
+  --ok:#5CC38A; --warn:#E3B04E; --crit:#F0906A; --ok-bg:#1B3327; --warn-bg:#3A3018; --crit-bg:#3F261C;
+  --focus:#A6B6CF;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Source Sans 3",system-ui,sans-serif;font-size:15px;line-height:1.45;padding:0 20px 40px}
+h1,h2,h3{font-family:"Archivo",system-ui,sans-serif;margin:0;text-wrap:balance;color:var(--ink)}
+.wrap{max-width:1280px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 28px;padding:20px 0 16px;border-bottom:3px solid var(--brand)}
+.logo{height:46px;width:auto;display:block}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .logo{background:#fff;padding:6px 10px;border-radius:4px} }
+:root[data-theme="dark"] .logo{background:#fff;padding:6px 10px;border-radius:4px}
+.title h1{font-size:24px;font-weight:700;letter-spacing:-.01em}
+.title h1 span{color:var(--brand)}
+.title h1 .beta{display:inline-block;vertical-align:middle;font-size:11px;letter-spacing:.14em;color:var(--brand);border:1.5px solid var(--brand);border-radius:3px;padding:2px 6px;margin-left:6px;position:relative;top:-3px}
+.eyebrow{font-family:"Archivo";font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.sub{color:var(--muted);max-width:52ch;margin:0;font-size:14px}
+.tabs{display:flex;gap:4px;margin-top:16px;border-bottom:1px solid var(--line)}
+.tab{font:600 13px "Archivo",system-ui,sans-serif;letter-spacing:.02em;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:10px 14px;cursor:pointer;margin-bottom:-1px}
+.tab.active{color:var(--ink);border-bottom-color:var(--brand)}
+.tab:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+[data-mode="pres"] .grav-only,[data-mode="grav"] .pres-only,[data-mode="flow"] .grav-only,[data-mode="flow"] .pres-only,[data-mode="grav"] .flow-only,[data-mode="pres"] .flow-only{display:none!important}
+.field input.bad{outline:2px solid var(--crit);background:var(--crit-bg)}
+.errbox{margin-top:16px;background:var(--crit-bg);border:1.5px solid var(--crit);border-radius:6px;padding:10px 14px;font-size:14px;color:var(--text)}
+.errbox b{color:var(--crit)}
+.btn{font:600 13px "Archivo",system-ui,sans-serif;background:var(--brand);color:var(--brand-ink);border:0;border-radius:4px;padding:9px 12px;cursor:pointer}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.sect{font-family:"Archivo";font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-top:2px}
+.layout{display:grid;grid-template-columns:310px 1fr;gap:20px;margin-top:20px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px}
+.controls{padding:16px;display:flex;flex-direction:column;gap:13px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-family:"Archivo";font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.field select,.field input[type=number]{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+.field input[type=number]{font-family:"JetBrains Mono",monospace;font-size:14px}
+.field select:focus,.field input:focus{outline:2px solid var(--focus);outline-offset:1px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.range{display:flex;align-items:center;gap:10px}
+.range input[type=range]{flex:1;accent-color:var(--brand)}
+.range output{font-family:"JetBrains Mono",monospace;font-size:13px;min-width:5.5ch;text-align:right}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.35}
+.hint a{color:var(--muted)}
+.divider{border:0;border-top:1px solid var(--line);margin:1px 0}
+.chart-panel{padding:14px 14px 10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.chart-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px}
+.chart-head h2{font-size:15px;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:22px;height:0;border-top:2px solid var(--r4);vertical-align:middle;margin-right:6px}
+.legend i.sel{border-color:var(--brand);border-top-width:3px}
+.legend i.dash{border-top-style:dashed;border-color:var(--warn)}
+.legend i.dot{border-top-style:dotted;border-color:var(--crit)}
+svg{width:100%;height:auto;display:block}
+.chart-wrap{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--navy);color:var(--bg);font-family:"JetBrains Mono",monospace;font-size:12px;padding:6px 8px;border-radius:4px;white-space:nowrap;transform:translate(12px,-50%);display:none}
+.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:20px}
+.tile{background:var(--panel);padding:12px 14px}
+.tile .k{font-family:"Archivo";font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tile .v{font-family:"JetBrains Mono",monospace;font-size:24px;font-weight:500;margin-top:4px;line-height:1.1;color:var(--ink)}
+.tile .u{font-size:13px;color:var(--muted);margin-left:4px;font-family:"Source Sans 3"}
+.tile .s{font-size:12.5px;color:var(--muted);margin-top:4px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:"Archivo";font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:3px;margin-top:6px}
+.chip::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.chip.ok{color:var(--ok);background:var(--ok-bg)} .chip.warn{color:var(--warn);background:var(--warn-bg)} .chip.crit{color:var(--crit);background:var(--crit-bg)}
+.tablewrap{margin-top:20px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:"Archivo";font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right;padding:8px 10px;border-bottom:2px solid var(--ink);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;font-family:"JetBrains Mono",monospace;font-size:13px;font-variant-numeric:tabular-nums}
+td:first-child{font-family:"Source Sans 3";font-size:14px;font-weight:600}
+tr.sel td{background:var(--brand-soft)}
+tr.sel td:first-child{color:var(--brand)}
+td .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+h2.sec{font-size:15px;font-weight:600;margin-top:24px}
+.foot{margin-top:22px;font-size:12.5px;color:var(--muted);max-width:95ch;line-height:1.5}
+.foot b{color:var(--text);font-weight:600}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted)}
+footer b{color:var(--ink);font-family:"Archivo";font-weight:600}
+/* Ábaco circular: placa azul GPF con anillo fijo de resultado, disco blanco giratorio con la escala de entrada y las marcas de cada DN */
+:root{--dl-plate:#17243D;--dl-band:#22324F;--dl-rink:#F2F5FA;--dl-rink2:#AFC0DA;--dl-disc:#FFFFFF;--dl-disc2:#E3E8F0;--dl-dink:#17243D;--dl-inband:#EEF1F6;--dl-win:rgba(225,38,29,.07);--dl-hub:#F7F8FA}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--dl-plate:#0A101A;--dl-band:#111A29;--dl-rink:#DDE4EE;--dl-rink2:#8293AE;--dl-disc:#25314A;--dl-disc2:#1A2336;--dl-dink:#EEF1F6;--dl-inband:#2E3B54;--dl-win:rgba(240,75,63,.12);--dl-hub:#1B2331}}
+:root[data-theme="dark"]{--dl-plate:#0A101A;--dl-band:#111A29;--dl-rink:#DDE4EE;--dl-rink2:#8293AE;--dl-disc:#25314A;--dl-disc2:#1A2336;--dl-dink:#EEF1F6;--dl-inband:#2E3B54;--dl-win:rgba(240,75,63,.12);--dl-hub:#1B2331}
+.layout>aside{grid-row:1/span 8;align-self:start}
+.layout>section,.layout>.mbar{grid-column:2;min-width:0}
+@media (max-width:900px){.layout>aside{grid-row:auto}.layout>section{grid-column:auto}.dial-panel{order:-1}}
+.dial-panel{padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.dial-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px}
+.dial-head h2{font-size:15px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost[aria-pressed="true"]{border-color:var(--brand);color:var(--brand)}
+.dial-wrap{display:flex;justify-content:center}
+#dial{width:100%;max-width:640px;height:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none;border-radius:50%}
+#dial:focus-visible{outline:3px solid var(--brand);outline-offset:4px}
+#dial #dl-disc{cursor:grab;touch-action:none}
+#dial.grab #dl-disc{cursor:grabbing}
+.dl-plate{fill:var(--dl-plate)}
+.dl-ringband{fill:none;stroke:var(--dl-band)}
+.dl-rt{stroke:var(--dl-rink2);stroke-width:1} .dl-rt.maj{stroke:var(--dl-rink);stroke-width:1.6}
+.dl-rl{fill:var(--dl-rink2);font:500 11px "JetBrains Mono",ui-monospace,monospace} .dl-rl.maj{fill:var(--dl-rink);font-size:13px;font-weight:600}
+.dl-rtitle{fill:var(--dl-rink);font:700 12px "Archivo",system-ui,sans-serif;letter-spacing:.18em}
+.dl-disc{stroke:var(--dl-disc2);stroke-width:2}
+.dl-inband{fill:none;stroke:var(--dl-inband)}
+.dl-it{stroke:var(--dl-dink);stroke-width:1;opacity:.6} .dl-it.maj{opacity:1;stroke-width:1.4}
+.dl-il{fill:var(--dl-dink);font:500 11.5px "JetBrains Mono",ui-monospace,monospace}
+.dl-knurl{fill:var(--dl-disc2)}
+.dl-window{fill:var(--dl-win);stroke:var(--brand);stroke-width:1.6}
+.dl-index{fill:var(--brand)}
+.dl-wtitle{fill:var(--brand);font:700 11px "Archivo",system-ui,sans-serif;letter-spacing:.16em}
+.dl-hair{stroke:var(--brand);stroke-width:2;stroke-linecap:round;opacity:.9}
+.dl-mk .dl-mt{stroke:var(--dl-dink);stroke-width:1.3}
+.dl-mk .dl-md{fill:var(--muted)}
+.dl-mk .dl-ml{fill:var(--dl-dink);font:500 11px "JetBrains Mono",ui-monospace,monospace}
+.dl-mk .dl-hit{fill:transparent;cursor:pointer}
+.dl-mk.st-ok .dl-md{fill:var(--ok)} .dl-mk.st-warn .dl-md,.dl-mk.st-fill .dl-md{fill:var(--warn)} .dl-mk.st-crit .dl-md,.dl-mk.st-dn .dl-md{fill:var(--crit)}
+.dl-mk.st-dn .dl-ml,.dl-mk.st-dn .dl-mt{opacity:.45}
+.dl-mk.sel .dl-mt{stroke:var(--brand);stroke-width:3} .dl-mk.sel .dl-ml{fill:var(--brand);font-weight:700;font-size:13px}
+.dl-mk:hover .dl-ml{text-decoration:underline}
+.dl-qdm{fill:var(--brand)} .dl-qdl{stroke:var(--brand);stroke-width:2.5} .dl-qdt{fill:var(--dl-rink);font:700 10px "Archivo",system-ui,sans-serif;letter-spacing:.06em}
+.dl-hubc{fill:var(--dl-hub);stroke:var(--line);stroke-width:1.5}
+.dl-h0{fill:var(--muted);font:600 12px "Archivo",system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.dl-h1{fill:var(--ink);font:600 30px "JetBrains Mono",ui-monospace,monospace}
+.dl-h1s{fill:var(--ink);font:600 18px "JetBrains Mono",ui-monospace,monospace}
+.dl-hu{fill:var(--muted);font:400 14px "Source Sans 3",system-ui,sans-serif}
+.dl-h2{fill:var(--text);font:500 13px "JetBrains Mono",ui-monospace,monospace}
+.dl-h3{font:700 12px "Archivo",system-ui,sans-serif;letter-spacing:.04em}
+.dl-h4{fill:var(--muted);font:400 11px "Source Sans 3",system-ui,sans-serif}
+.dl-h3.st-ok{fill:var(--ok)} .dl-h3.st-warn,.dl-h3.st-fill{fill:var(--warn)} .dl-h3.st-crit,.dl-h3.st-dn{fill:var(--crit)}
+.dl-pipe{fill:var(--panel)} .dl-pipeo{fill:none;stroke:var(--dl-dink);stroke-width:3} .dl-water{fill:var(--water,#3E7CB1);opacity:.85}
+.dial-cap{margin:0;font-size:13px;color:var(--muted);max-width:75ch}
+.dial-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted)}
+.dial-legend span{display:inline-flex;align-items:center;gap:6px}
+.dial-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.dial-keys{font-size:12px;color:var(--muted)}
+[data-mode="flow"] .dial-panel,[data-mode="mec"] .dial-panel{display:none!important}
+:root:not([data-curves="1"])[data-mode="grav"] .chart-panel,:root:not([data-curves="1"])[data-mode="pres"] .chart-panel{display:none!important}
+@media (prefers-reduced-motion: no-preference){#dl-disc{transition:transform .12s ease-out} #dial.grab #dl-disc{transition:none}}
+@media print{.dial-panel{break-inside:avoid}.btn.ghost{display:none}}
+@media (max-width:600px){
+ .dl-rl{display:none} .dl-rl.maj{display:inline;font-size:22px}
+ .dl-ml{font-size:19px!important} .dl-mk.sel .dl-ml{font-size:21px!important}
+ .dl-il{font-size:19px} .dl-it{stroke-width:1.6}
+ .dl-wtitle{font-size:16px} .dl-rtitle{font-size:18px}
+ .dl-h0{font-size:17px} .dl-h1{font-size:42px} .dl-hu{font-size:19px} .dl-h1s{font-size:22px} .dl-h2{font-size:19px} .dl-h3{font-size:17px}
+ .dl-qdt{display:none}
+}
+.dial-btns{display:flex;gap:8px;flex-wrap:wrap}
+.hprint{display:none;margin:0;font-size:12px;color:var(--text)}
+@media print{.hprint{display:block}}
+.dial-num{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
+.dial-num label{font-family:"Archivo",system-ui,sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.dial-num input{width:9ch;font:500 16px "JetBrains Mono",ui-monospace,monospace;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:6px 8px;text-align:right}
+.btn.sm{padding:6px 12px;font-size:16px;line-height:1}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#dial{-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+@media (hover:none){.dial-keys{display:none}}
+@media print{.dial-cap,.dial-num,.dial-legend span:last-child{display:none!important}}
+.dial-num input.bad{outline:2px solid var(--crit);background:var(--crit-bg)} #dialmsg{color:var(--crit);min-width:0}
+
+.title h1 .ver{display:inline-block;vertical-align:middle;font:500 11px "JetBrains Mono",monospace;color:var(--muted);margin-left:8px;position:relative;top:-3px}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<noscript><div style="background:#FBE4E2;border:2px solid #E1261D;border-radius:6px;padding:14px 18px;margin:16px 0;font-family:Arial,sans-serif;color:#17243D;font-size:15px;line-height:1.5"><b>Esta vista previa no ejecuta la aplicación.</b> Si estás viendo el archivo como adjunto (por ejemplo en Mail o Archivos del iPad), los cálculos no funcionan. Ábrelo en un navegador (Safari, Chrome, Edge) o usa la versión en línea: <a href="https://claude.ai/artifact/SxDNdCcPpD3fmLsRMzWsTB">https://claude.ai/artifact/SxDNdCcPpD3fmLsRMzWsTB</a></div></noscript>
+<header>
+  <img class="logo" alt="Grupo Plásticos Ferro" src="data:image/png;base64,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">
+  <div class="title">
+    <div class="eyebrow" id="eyebrow">Grupo GPF · Saneamiento por gravedad</div>
+    <h1>Ábaco de saneamiento <span>GPF</span> <span class="beta">BETA</span><span class="ver">v1.0 · 19-oct-2026</span></h1>
+  </div>
+  <p class="sub" id="subtitle">Caudal y velocidad calculados con el diámetro interior real de cada tubo GPF y con el criterio de proyecto del gestor que elijas.</p>
+</header>
+<nav class="tabs" role="tablist">
+  <button class="tab active" id="tab-grav" role="tab" aria-selected="true" data-mode="grav">Saneamiento por gravedad</button>
+  <button class="tab" id="tab-flow" role="tab" aria-selected="false" data-mode="flow">Caudal de diseño</button>
+  <button class="tab" id="tab-mec" role="tab" aria-selected="false" data-mode="mec">Cálculo mecánico</button>
+</nav>
+
+<div class="layout">
+  <aside class="panel controls">
+    <div class="field mec-only" hidden><label for="mkind">Tubería</label><select id="mkind"><option value="grav">Saneamiento (sin presión)</option><option value="pres">Presión (abastecimiento, riego, impulsión)</option></select></div>
+    <div class="field"><label for="fam">Producto</label><select id="fam"></select><div class="hint" id="famhint"></div></div>
+    <div class="row2">
+      <div class="field"><label for="ser">Serie</label><select id="ser"></select></div>
+      <div class="field"><label for="dn">Diámetro</label><select id="dn"></select></div>
+    </div>
+    <div class="hint flow-only">El producto y la serie elegidos arriba se usan para calcular el DN mínimo que necesita el caudal resultante.</div>
+    <hr class="divider">
+    <div class="sect flow-only">Aguas residuales</div>
+    <div class="row2 flow-only">
+      <div class="field"><label for="pob">Población (hab)</label><input type="number" id="pob" step="100" min="0" value="5000"></div>
+      <div class="field"><label for="dot">Dotación (l/hab·día)</label><input type="number" id="dot" step="5" min="0" value="250"></div>
+    </div>
+    <div class="row2 flow-only">
+      <div class="field"><label for="cret">Coef. retorno</label><input type="number" id="cret" step="0.05" min="0" max="1" value="0.8"></div>
+      <div class="field"><label for="infil">Infiltración (l/s)</label><input type="number" id="infil" step="0.5" min="0" value="0"></div>
+    </div>
+    <div class="row2 flow-only">
+      <div class="field"><label for="cpmet">Coef. punta</label><select id="cpmet"><option value="harmon">Harmon</option><option value="babbitt">Babbitt</option><option value="gifft">Gifft</option><option value="k24">Fijo 2,4 (EMACSA / Huesna)</option><option value="custom">Personalizado</option></select></div>
+      <div class="field"><label for="cpval">Valor Cp</label><input type="number" id="cpval" step="0.1" min="1" value="2.4"></div>
+    </div>
+    <div class="hint flow-only" id="dothint">Dotaciones de referencia: Guadalquivir / EMACSA 255, Huesna 330, EMACSA doméstico 175 (+ usos), genérico 200–300 l/hab·día. Q mín. = 0,25·Q medio (CYII) para comprobar autolimpieza.</div>
+    <hr class="divider flow-only">
+    <div class="sect flow-only">Aguas pluviales (método racional)</div>
+    <div class="row2 flow-only">
+      <div class="field"><label for="area">Superficie (ha)</label><input type="number" id="area" step="0.5" min="0" value="2"></div>
+      <div class="field"><label for="cesc">Tipo de zona · C</label><select id="cesc"><option value="0.95">Grandes áreas pavimentadas · 0,95</option><option value="0.90">Núcleo urbano (Huesna) · 0,90</option><option value="0.85" selected>Área urbana (calles, edif. en altura) · 0,85</option><option value="0.75">Mixta / Valencia medio · 0,75</option><option value="0.50">Área residencial (unifamiliar+jardín) · 0,50</option><option value="0.20">Áreas no pavimentadas / parques · 0,20</option></select></div>
+    </div>
+    <div class="field flow-only"><label for="imet">Intensidad de lluvia</label><select id="imet"><option value="direct">Introducir I (mm/h)</option><option value="ic52" selected>Instrucción 5.2-IC (Pd, I1/Id, tc)</option><option value="huesna">Huesna: Ih = 0,246·P24</option><option value="emasesa">EMASESA rev. 8: tabla IDF (10–180 min)</option><option value="valencia">València: IDF T = 25 años (fórmula)</option><option value="fabra">Barcelona (Obs. Fabra): Sherman T = 10 / 25</option></select></div>
+    <div class="row2 flow-only">
+      <div class="field"><label for="ival">I (mm/h)</label><input type="number" id="ival" step="1" min="0" value="60"></div>
+      <div class="field"><label for="tc">t conc. (min)</label><input type="number" id="tc" step="1" min="5" value="15"></div>
+    </div>
+    <div class="row2 flow-only">
+      <div class="field"><label for="ciudad">Capital (Pd AEMET e I1/Id)</label><select id="ciudad"><option value="">— elegir —</option></select></div>
+      <div class="field"><label for="tret">Periodo de retorno T</label><select id="tret"><option value="10">10 años</option><option value="25" selected>25 años</option></select></div>
+    </div>
+    <div class="row2 flow-only">
+      <div class="field"><label for="pd">P diaria Pd (mm)</label><input type="number" id="pd" step="5" min="0" value="100"></div>
+      <div class="field"><label for="i1id">I1/Id (zona)</label><select id="i1id"><option value="8">A Coruña · 8</option><option value="10">Albacete · 10</option><option value="11">Alicante · 11</option><option value="10">Almería · 10</option><option value="10">Badajoz · 10</option><option value="11">Barcelona · 11</option><option value="9">Bilbao · 9</option><option value="10">Burgos · 10</option><option value="11">Castellón · 11</option><option value="10">Ceuta · 10</option><option value="9">Ciudad Real · 9</option><option value="10">Cuenca · 10</option><option value="10">Cáceres · 10</option><option value="8">Cádiz · 8</option><option value="9">Córdoba · 9</option><option value="11">Girona · 11</option><option value="9">Granada · 9</option><option value="10">Guadalajara · 10</option><option value="9">Huelva · 9</option><option value="10">Huesca · 10</option><option value="9">Jaén · 9</option><option value="9">Las Palmas · 9</option><option value="9">León · 9</option><option value="11">Lleida · 11</option><option value="10">Logroño · 10</option><option value="8">Lugo · 8</option><option value="10">Madrid · 10</option><option value="11">Melilla · 11</option><option value="11">Murcia · 11</option><option value="10">Málaga · 10</option><option value="8">Ourense · 8</option><option value="9">Oviedo · 9</option><option value="10">Palencia · 10</option><option value="11">Palma · 11</option><option value="9">Pamplona · 9</option><option value="8">Pontevedra · 8</option><option value="10">Salamanca · 10</option><option value="9">San Sebastián · 9</option><option value="8">Santa Cruz de Tenerife · 8</option><option value="9">Santander · 9</option><option value="10">Segovia · 10</option><option value="9">Sevilla · 9</option><option value="10">Soria · 10</option><option value="11">Tarragona · 11</option><option value="11">Teruel · 11</option><option value="10">Toledo · 10</option><option value="11">Valencia · 11</option><option value="10">Valladolid · 10</option><option value="9">Vitoria · 9</option><option value="10">Zamora · 10</option><option value="10">Zaragoza · 10</option><option value="10">Ávila · 10</option></select></div>
+    </div>
+    <div class="hint flow-only">Al elegir capital se cargan Pd (AEMET, Calendario Meteorológico 2015, ajuste Gumbel, 1 día) para el T elegido y el I1/Id de su provincia según el mapa de la Orden FOM/298/2016 (5.2-IC). Huesna fija P24 = 170 mm en Sevilla. Comprueba siempre con la estación y el T que exija el gestor.</div>
+    <hr class="divider flow-only">
+    <div class="field flow-only"><label for="redtipo">Red a dimensionar</label><select id="redtipo"><option value="res">Separativa · residuales (Q punta)</option><option value="plu">Separativa · pluviales (Q pluvial)</option><option value="uni" selected>Unitaria (Q punta + Q pluvial)</option></select></div>
+    <button class="btn flow-only" id="usarq" type="button">Usar este caudal en el ábaco de gravedad</button>
+    <div class="field grav-only"><label for="norma">Criterio de proyecto</label><select id="norma"></select><div class="hint" id="normahint"></div></div>
+    <div class="field grav-only"><label for="red">Tipo de red</label><select id="red"><option value="res">Residuales (separativa)</option><option value="plu">Pluviales (separativa)</option><option value="uni">Unitaria</option></select></div>
+    <div class="row2 grav-only">
+      <div class="field"><label for="formula">Fórmula</label><select id="formula"><option value="colebrook">Prandtl-Colebrook</option><option value="manning">Manning</option></select></div>
+      <div class="field"><label for="coef" id="coeflabel">k (mm)</label><input type="number" id="coef" step="0.001" min="0.001"></div>
+    </div>
+    <div class="row2 pres-only">
+      <div class="field"><label for="pformula">Fórmula</label><select id="pformula"><option value="colebrook">Colebrook-White</option><option value="hw">Hazen-Williams</option></select></div>
+      <div class="field"><label for="pcoef" id="pcoeflabel">k (mm)</label><input type="number" id="pcoef" step="0.01" min="0.001" value="0.10"></div>
+    </div>
+    <div class="row2 pres-only">
+      <div class="field"><label for="vmin">v mín. (m/s)</label><input type="number" id="vmin" step="0.1" min="0" value="0.5"></div>
+      <div class="field"><label for="vmax">v máx. (m/s)</label><input type="number" id="vmax" step="0.1" min="0.1" value="2.0"></div>
+    </div>
+    <div class="hint pres-only">k = 0,10 mm es un valor de proyecto habitual para PVC y PE en servicio (la ficha declara 0,007 mm en tubo nuevo). Velocidades 0,5–2,0 m/s son las usuales en abastecimiento; en riego se admiten hasta 2,5–3 m/s.</div>
+    <hr class="divider pres-only">
+    <div class="field pres-only"><label for="pq">Caudal</label>
+      <div class="range"><input type="range" id="pq" min="-0.5" max="3.5" step="any" value="1.3"><output id="pqout" for="pq">20 l/s</output></div></div>
+    <div class="field pres-only"><label for="plen">Longitud del tramo (m)</label><input type="number" id="plen" step="10" min="1" value="1000"></div>
+    <div class="field pres-only"><label for="temp">Temperatura del agua</label><select id="temp"><option value="1.31e-6">10 °C</option><option value="1.01e-6" selected>20 °C</option></select></div>
+    <hr class="divider grav-only">
+    <div class="field grav-only"><label for="pend">Pendiente</label>
+      <div class="range"><input type="range" id="pend" min="-0.3" max="2" step="any" value="0.7"><output id="pendout" for="pend">5 ‰</output></div></div>
+    <div class="field grav-only"><label for="fill">Calado h/D</label>
+      <div class="range"><input type="range" id="fill" min="10" max="100" step="1" value="75"><output id="fillout" for="fill">75 %</output></div></div>
+    <div class="field grav-only"><label for="qdis">Caudal de diseño (opcional)</label><input type="number" id="qdis" step="1" min="0" placeholder="l/s"><div class="hint">Marca en la tabla el menor DN que lo transporta con la pendiente y el calado fijados.</div></div>
+
+    <button class="btn grav-only" id="tomec" type="button">Comprobar este tubo a cargas (cálculo mecánico)</button>
+    <button class="btn pres-only" hidden id="tomecp" type="button">Comprobar este tubo a cargas y presión (cálculo mecánico)</button>
+    <div class="sect mec-only">Instalación</div>
+    <div class="row2 mec-only">
+      <div class="field"><label for="minst">Tipo</label><select id="minst"><option value="zanja">Zanja</option><option value="terraplen">Terraplén</option><option value="zanjaterr">Zanja terraplenada</option></select></div>
+      <div class="field"><label for="mseg">Seguridad</label><select id="mseg"><option value="2.5">A · ≥ 2,5</option><option value="2">B · ≥ 2,0</option></select></div>
+    </div>
+    <div class="row3 mec-only">
+      <div class="field"><label for="mH">H (m)</label><input type="number" id="mH" step="0.1" min="0.3" value="2"></div>
+      <div class="field"><label for="mB">B (m)</label><input type="number" id="mB" step="0.05" min="0.3" value="0.9"></div>
+      <div class="field"><label for="mbeta">Talud β (º)</label><input type="number" id="mbeta" step="5" min="30" max="90" value="90"></div>
+    </div>
+    <div class="row2 mec-only" id="mterbox" hidden>
+      <div class="field"><label for="mHt">Terraplén sobre la zanja Ht (m)</label><input type="number" id="mHt" step="0.1" min="0" value="1"></div>
+      <div class="field"><label for="mgt">Peso del terraplén (kN/m³)</label><input type="number" id="mgt" step="0.5" min="10" value="20"></div>
+    </div>
+    <div class="hint mec-only" id="mterhint" hidden>Zanja terraplenada: zanja cuya coronación queda bajo un terraplén posterior de altura Ht. H es el relleno de la zanja sobre la clave; el terraplén entra como sobrecarga reducida por el efecto silo, y cuenta también para el tráfico.</div>
+    <div class="row2 mec-only">
+      <div class="field"><label for="mHa">Freático sobre clave (m)</label><input type="number" id="mHa" step="0.1" min="0" value="0"></div>
+      <div class="field"><label for="mang">Apoyo 2α</label><select id="mang"><option>60</option><option selected>90</option><option>120</option><option>180</option></select></div>
+    </div>
+    <div class="row2 mec-only mpres">
+      <div class="field"><label for="mPi">Presión de trabajo (bar)</label><input type="number" id="mPi" step="0.5" min="0" placeholder="p. ej. 6"></div>
+      <div class="field"><label for="mkpa">1 bar equivale a</label><select id="mkpa"><option value="100">100 kN/m² (SI)</option><option value="98">98 kN/m² (Tuyper)</option></select></div>
+    </div>
+    <div class="hint mec-only mpres"><span id="mpnhint"></span> Pon la presión máxima de trabajo de la red (no la PN: la PN ya incluye el coeficiente de seguridad del tubo). El resultado indica además la presión máxima admisible con esta instalación. La presión interior no cambia la deformación ni el aplastamiento, pero añade tracción a la pared y reduce la seguridad a rotura.</div>
+    <hr class="divider mec-only">
+    <div class="sect mec-only">Relleno y terreno</div>
+    <div class="row2 mec-only">
+      <div class="field"><label for="mfill">Relleno sobre el tubo</label><select id="mfill"><option value="0">G1 · no cohesivo</option><option value="1">G2 · poco cohesivo</option><option value="2">G3 · med. cohesivo</option><option value="3">G4 · cohesivo</option></select></div>
+      <div class="field"><label for="mfill2">Relleno junto al tubo</label><select id="mfill2"><option value="0">G1 · no cohesivo</option><option value="1">G2 · poco cohesivo</option><option value="2">G3 · med. cohesivo</option><option value="3">G4 · cohesivo</option></select></div>
+    </div>
+    <div class="field mec-only"><label for="mfinst">Ejecución del relleno</label><select id="mfinst"><option value="0">Compactado por capas en toda la zanja</option><option value="1">Compactado solo en la zona del tubo</option><option value="2">Compactado posteriormente</option><option value="3">Zanja entibada</option></select></div>
+    <div class="row4 mec-only">
+      <div class="field"><label for="mE1">E1</label><input type="number" id="mE1" step="0.5" min="0.5" value="6"></div>
+      <div class="field"><label for="mE2">E2</label><input type="number" id="mE2" step="0.5" min="0.5" value="6"></div>
+      <div class="field"><label for="mE3">E3</label><input type="number" id="mE3" step="0.5" min="0.5" value="6"></div>
+      <div class="field"><label for="mE4">E4</label><input type="number" id="mE4" step="0.5" min="0.5" value="6"></div>
+    </div>
+    <div class="hint mec-only">Módulos de compresión en N/mm²: E1 relleno sobre el tubo, E2 relleno junto al tubo, E3 terreno lateral, E4 terreno bajo el tubo. Con Proctor Normal 90 %: G1 6 · G2 3 · G3 2 · G4 1,5; al 95 %: 16 · 8 · 5 · 4.</div>
+    <details class="mec-only mprop"><summary>Proponer E1–E4 con la tabla de Proctor</summary>
+      <div class="row3" style="margin-top:8px">
+        <div class="field"><label for="mpr">Proctor relleno</label><select id="mpr"><option>85</option><option selected>90</option><option>92</option><option>95</option><option>97</option><option>100</option></select></div>
+        <div class="field"><label for="mtn">Terreno natural</label><select id="mtn"><option value="0">G1</option><option value="1">G2</option><option value="2">G3</option><option value="3">G4</option></select></div>
+        <div class="field"><label for="mpt">Proctor terreno</label><select id="mpt"><option>85</option><option selected>90</option><option>92</option><option>95</option><option>97</option><option>100</option></select></div>
+      </div>
+      <button class="btn" id="mprop" type="button" style="margin-top:8px">Aplicar a E1–E4</button>
+      <div class="hint">E1 según el relleno sobre el tubo, E2 según el relleno junto al tubo y E3/E4 según el terreno natural (tabla de Tuyper y AseTUB, N/mm²).</div>
+    </details>
+    <div class="row2 mec-only">
+      <div class="field"><label for="mgamma">Peso relleno (kN/m³)</label><input type="number" id="mgamma" step="0.5" min="10" max="25" value="20"></div>
+      <div class="hint" style="align-self:end">Freático 0 = agua a la altura de la clave (lado seguro para el pandeo).</div>
+    </div>
+    <hr class="divider mec-only">
+    <div class="sect mec-only">Sobrecargas</div>
+    <div class="field mec-only"><label for="mveh">Sobrecarga</label><select id="mveh"><option value="">Sin sobrecargas</option><option value="LT12">LT 12 · 2 ejes · 40 kN/rueda</option><option value="HT26">HT 26 · 2 ejes · 65 kN/rueda</option><option value="HT39">HT 39 · 3 ejes · 65 kN/rueda</option><option value="HT60">HT 60 · 3 ejes · 100 kN/rueda</option><option value="Q60">Q 60 · 2 ejes · 150 kN/rueda</option><option value="custom">Carga concentrada (otro vehículo)</option><option value="rep">Carga repartida (acopio, maquinaria…)</option></select></div>
+    <div class="mec-only" id="mcusbox" hidden>
+      <div class="row3">
+        <div class="field"><label for="mPc">Pc rueda (kN)</label><input type="number" id="mPc" step="5" min="1" value="50"></div>
+        <div class="field"><label for="mejes">Ejes</label><select id="mejes"><option value="2">2</option><option value="3">3</option></select></div>
+        <div class="field"><label for="mphi">Impacto φ</label><input type="number" id="mphi" step="0.1" min="1" max="2" value="1.5"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="ma">a · entre ruedas (m)</label><input type="number" id="ma" step="0.1" min="0.1" value="2"></div>
+        <div class="field"><label for="mb">b · entre ejes (m)</label><input type="number" id="mb" step="0.1" min="0.1" value="3"></div>
+      </div>
+      <div class="hint">Vehículo de ruedas iguales: separación a entre ruedas de un eje y b entre ejes. φ habitual: 1,5 vehículos ligeros, 1,4 medios, 1,2 pesados de 3 ejes, 1,0 cargas lentas o estáticas.</div>
+    </div>
+    <div class="mec-only" id="mrepbox" hidden>
+      <div class="row3">
+        <div class="field"><label for="mPd">Pd (kN/m²)</label><input type="number" id="mPd" step="1" min="0" value="20"></div>
+        <div class="field"><label for="mrl">Largo (m)</label><input type="number" id="mrl" step="0.5" min="0.1" value="5"></div>
+        <div class="field"><label for="mra">Ancho (m)</label><input type="number" id="mra" step="0.5" min="0.1" value="3"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="mimp">Apoyo de la carga</label><select id="mimp"><option value="fijas">Ruedas o fija · ×1,0</option><option value="cadenas">Cadenas · ×1,2</option></select></div>
+        <div class="field"><label for="mCd">Cd (vacío = automático)</label><input type="number" id="mCd" step="0.01" min="0" max="1" placeholder="auto"></div>
+      </div>
+      <div class="hint">Carga uniforme rectangular centrada sobre el tubo. Cd se calcula con la integral de Boussinesq (Newmark) a la profundidad de cálculo; puedes fijarlo a mano para reproducir otro programa.</div>
+    </div>
+    <div class="field mec-only" id="mpavf"><label for="mpav">Superficie</label><select id="mpav"><option value="0">Sin pavimentar</option><option value="1">Pavimentada</option></select></div>
+    <div class="row4 mec-only" id="mpavbox" hidden>
+      <div class="field"><label for="mh1">h1 (m)</label><input type="number" id="mh1" step="0.05" min="0" value="0.2"></div>
+      <div class="field"><label for="mef1">Ef1</label><input type="number" id="mef1" step="50" min="1" value="1000"></div>
+      <div class="field"><label for="mh2">h2 (m)</label><input type="number" id="mh2" step="0.05" min="0" value="0.1"></div>
+      <div class="field"><label for="mef2">Ef2</label><input type="number" id="mef2" step="10" min="1" value="200"></div>
+    </div>
+    <hr class="divider mec-only">
+    <details class="mec-only mprop"><summary>Datos del proyecto (para el informe)</summary>
+      <div class="field" style="margin-top:8px"><label for="mproj">Proyecto</label><input type="text" id="mproj" placeholder="Nombre de la obra"></div>
+      <div class="row2">
+        <div class="field"><label for="mtramo">Tramo</label><input type="text" id="mtramo" placeholder="Pozo 1 – Pozo 2"></div>
+        <div class="field"><label for="mautor">Autor</label><input type="text" id="mautor"></div>
+      </div>
+    </details>
+  </aside>
+
+    <section class="panel dial-panel" id="dialpanel" aria-label="Ábaco circular">
+    <div class="dial-head">
+      <h2 id="dialtitle">Ábaco circular</h2><div class="dial-btns">
+      <button class="btn ghost" id="dialprint" type="button">Imprimir</button><button class="btn ghost" id="curvesbtn" type="button" aria-pressed="false">Ver también como curvas</button></div>
+    </div>
+    <p class="hprint" id="hprint"></p>
+    <div class="dial-wrap"><svg id="dial" viewBox="0 0 640 640" tabindex="0" role="application" aria-label="Ábaco circular: arrastra el disco blanco para girarlo"></svg></div>
+    <div class="dial-num"><label for="dialval" id="dialvallab">Pendiente (‰)</label><button class="btn ghost sm" id="dialminus" type="button" aria-label="Bajar">−</button><input type="text" id="dialval" inputmode="decimal" autocomplete="off" spellcheck="false"><button class="btn ghost sm" id="dialplus" type="button" aria-label="Subir">+</button><span class="hint" id="dialmsg" role="status"></span></div>
+    <p class="sr" id="dialsr" aria-live="polite"></p>
+    <p class="dial-cap" id="dialcap"></p>
+    <div class="dial-legend"><span><i style="background:var(--ok)"></i>Dentro de criterio</span><span><i style="background:var(--warn)"></i>Velocidad baja o calado</span><span><i style="background:var(--crit)"></i>Velocidad alta o DN bajo el mínimo</span><span><i style="background:var(--brand)"></i>DN elegido (toca una marca para elegir otro)</span></div>
+    <p class="dial-keys">Teclado: con el ábaco seleccionado, ← → giran el disco (Mayús para pasos grandes) y ↑ ↓ cambian de DN.</p>
+  </section>
+  <section class="panel chart-panel">
+    <div class="chart-head">
+      <h2 id="charttitle">Caudal frente a pendiente</h2>
+      <div class="legend" id="legend"><span><i class="sel"></i>DN seleccionado</span><span><i></i>Resto de la gama</span><span><i class="dash"></i>v &lt; v mín.</span><span><i class="dot"></i>v &gt; v máx.</span></div>
+    </div>
+    <div class="chart-wrap"><svg id="chart" viewBox="0 0 900 560" role="img" aria-label="Ábaco caudal-pendiente"></svg><div class="tip" id="tip"></div></div>
+  </section>
+  <section class="panel mecpanel mec-only" id="mecpanel" aria-live="polite">
+    <div id="mprint" class="mprint"></div>
+    <div class="mverdict" id="mverdict"><span class="pill" id="mpill">—</span><span class="why" id="mwhy"></span><button class="btn mprintbtn" id="mprintbtn" type="button">Imprimir informe</button></div>
+    <p class="mwarn" id="mwarn" hidden></p>
+    <div class="mkpis" id="mkpis"></div>
+    <div class="mtwo">
+      <div><h3>Comprobaciones</h3><div class="mchk" id="mchk"></div></div>
+      <div><h3>Sección de la zanja</h3><svg id="msec" viewBox="0 0 360 260" role="img" aria-label="Esquema de la zanja"></svg></div>
+    </div>
+    <div class="mtable"><details id="mdetbox"><summary>Resultados detallados a corto y largo plazo</summary><div class="tablewrap" style="margin-top:10px"><table id="mdet"></table></div></details></div>
+    <p class="mnote">Método UNE 53331 (ATV-A 127), el mismo del programa de cálculo de Tuyper y AseTUB, con el que se ha validado: 67 casos de saneamiento, 15 de presión y 30 con zanja terraplenada, cargas concentradas y repartidas y rellenos G1–G4 (Tuyper y AseTUB); diferencias ≤ 0,25 % en tensiones y deformación y ≤ 2 % en pandeo por agua exterior. Saneamiento: PVC-U E = 3.600 / 1.750 N/mm² a corto / largo plazo; GPF ecoSan con el espesor equivalente de su pared estructurada y tensión admisible 81 / 45 N/mm²; GPF PVC Compacto con su espesor real y 90 / 50 N/mm². Presión: GPF PVC Presión 3.600 / 1.750 y 90 / 50 N/mm²; GPF PVC Biorientado (PVC-O 500) 4.000 / 2.800 y 100 / 70 N/mm²; GPF TUPLEN (PE100) 800 / 200 y 23,0 / 19,3 N/mm². La presión interior suma a cada sección el axil Pi·ri y el momento Pi·e²/12. Con la presión nominal completa (que ya lleva el coeficiente de seguridad del tubo) y seguridad A, los PVC-O no cumplen nunca y los PE casi nunca, igual que en Tuyper y AseTUB: compruébalos con la presión de trabajo y mira la presión máxima admisible que da el ábaco. Cargas repartidas: Cd exacto por Boussinesq (Tuyper y AseTUB leen Cd de un gráfico y pueden dar hasta un 30 % menos; se puede fijar a mano). Ancho de zanja: aviso por debajo del mínimo de UNE-EN 1610. Pandeo por agua exterior: fuera del rango contrastado, αD se toma por el lado seguro. Dos tubos en la misma zanja: Tuyper y AseTUB calculan cada tubo con sus propios datos, sin interacción entre ellos; aquí se comprueba cada tubo por separado.</p>
+  </section>
+  <button class="mbar mec-only" id="mbar" type="button">—</button>
+</div>
+
+<div class="results" id="results"></div>
+
+<h2 class="sec" id="tabletitle">Toda la gama a la pendiente fijada</h2>
+<div class="tablewrap"><table id="table"></table></div>
+
+<p class="foot" id="foot"></p>
+
+<footer><span><b>Grupo GPF</b> · Grupo Plásticos Ferro · www.grupogpf.com · <a href="Abaco_Presion_GPF.html">Abrir el ábaco de presión</a> (misma carpeta)</span><span><b>Versión beta.</b> Herramienta orientativa: contrasta los resultados con tu propio cálculo. No sustituye al cálculo justificativo del proyecto ni a la normativa del gestor.</span></footer>
+</div>
+
+<script>
+// Ábaco_pro · motor de cálculo mecánico de tuberías enterradas (método UNE 53331 / ATV-A 127)
+// Reproduce el programa de cálculo de Tuyper/AseTUB. Unidades: kN, m, kN/m² salvo indicación.
+const MEC = (() => {
+  const PHI = [35, 30, 25, 20];               // ángulo de rozamiento relleno G1..G4 (º)
+  const DELTA = [2/3, 1/3, 0, 1];             // fracción de φ según tipo de instalación del relleno
+  const K2G = [0.4, 0.3, 0.2, 0.1];           // coef. empuje relleno alrededor del tubo (G1..G4)
+  const ANG = {
+    60:  {CV1:0.1053, Ch1:0.0956, mq:[0.286,-0.293,0.377], nq:[0.080,-1,-0.080], mt:[6.7025,-7.7052,12.2439], nt:[6.0916,-22.937,-6.0916], ma:[2.2907,-2.6391,4.2001], na:[7.0799,2.1499,12.9199]},
+    90:  {CV1:0.0966, Ch1:0.0956, mq:[0.274,-0.279,0.314], nq:[0.053,-1,-0.053], mt:[6.122,-7.0719,9.394],   nt:[-4.8652,-22.937,-4.8652], ma:[2.0987,-2.4306,3.2097], na:[6.67,2.1499,13.3298]},
+    120: {CV1:0.0893, Ch1:0.0891, mq:[0.261,-0.265,0.275], nq:[0.027,-1,-0.027], mt:[5.5414,-6.4386,7.5997], nt:[3.6468,-22.937,-3.6468], ma:[1.9012,-2.2002,2.6007], na:[6.2499,2.1499,13.7499]},
+    180: {CV1:0.0833, Ch1:0.0833, mq:[0.250,-0.250,0.250], nq:[0,-1,0],          mt:[5.0137,-5.7525,6.4386], nt:[2.4366,-22.937,-2.4366], ma:[1.7201,-1.9588,2.2002], na:[5.8298,2.1499,14.17]}
+  };
+  const VEH = { LT12:{Pc:40,a:2,b:3,ejes:2,phi:1.5}, HT26:{Pc:65,a:2,b:3,ejes:2,phi:1.4}, HT39:{Pc:65,a:2,b:1.5,ejes:3,phi:1.2},
+                HT60:{Pc:100,a:2,b:1.5,ejes:3,phi:1.2}, Q60:{Pc:150,a:2,b:2,ejes:2,phi:1.0} };
+  function boussinesq(H, Dn, n=60){ let s=0; for(let i=0;i<n;i++){ const x=-Dn/2+(i+.5)*Dn/n; for(let j=0;j<n;j++){ const y=-0.5+(j+.5)/n; const R2=x*x+y*y+H*H; s+=3*H**3/(2*Math.PI*Math.pow(R2,2.5)); } } return s/(n*n); }
+  function trafico(H, Dn, v){ const k=3*H**3/(2*Math.PI), f=r=>Math.pow(r*r+H*H,-2.5), c=Math.hypot(v.a,v.b);
+    const oth = v.ejes===2 ? k*(f(v.a)+f(v.b)+f(c)) : k*(f(v.a)+2*f(v.b)+2*f(c));
+    return v.Pc*v.phi*(boussinesq(H,Dn)+oth); }
+  // αD (pandeo por agua exterior): ajuste a 60 resultados de Tuyper/AseTUB (PVC-U, ecoSan, PVC-O, PE100; error máx. ±2 %)
+  // Para tubos muy rígidos frente al terreno (Vts > 0,1) el programa toma αD = 3 (anillo libre).
+  // Fuera del dominio del ajuste (Vts 0,00232–0,0815; rm/e 5,0–22,4) se toma el menor de: valor extrapolado y valor en el borde (lado seguro).
+  const fitAD=(v,q)=>{ const L=Math.log(v), R=Math.log(q); return Math.exp(0.43590205-0.486177*L-0.11076949*R-0.03697296*L*L-0.06306397*L*R); };
+  const AD_DOM={v:[0.00232,0.0815], q:[5.0,22.36]};
+  const alphaD = (Vts, rm, e) => { if(Vts>0.1) return 3; const q=rm/e, cl=(x,[a,b])=>Math.min(Math.max(x,a),b);
+    return Math.max(3, Math.min(fitAD(Vts,q), fitAD(cl(Vts,AD_DOM.v), cl(q,AD_DOM.q)))); };
+  const adOut=(Vts,rm,e)=> Vts<=0.1 && (Vts<AD_DOM.v[0]||Vts>AD_DOM.v[1]||rm/e<AD_DOM.q[0]||rm/e>AD_DOM.q[1]);
+  // Factor de influencia de Newmark para la esquina de un rectángulo m×n (m=B/z, n=L/z)
+  function Inm(m,n){ const m2=m*m,n2=n*n,s=m2+n2+1, r=Math.sqrt(s); let at=Math.atan2(2*m*n*r, s-m2*n2); if(at<0) at+=Math.PI;
+    return (2*m*n*r/(s+m2*n2)*(s+1)/s + at)/(4*Math.PI); }
+  const cdRect=(m,n)=> (m>0&&n>0) ? 4*Inm(m,n) : 0;
+  function calc(p){
+    // p: DN (mm), e (mm, nominal), eeq (mm, espesor equivalente de cálculo), E:{LP,CP} (N/mm²), sig:{LP,CP} (N/mm²)
+    //    inst ('zanja'|'terraplen'), H, B, beta, Ha, ang, fill (0..3), fillInst (0..3), fill2 (0..1), gamma, E1..E4,
+    //    veh (null|'LT12'...), pav (null|{h1,Ef1,h2,Ef2}), seg (2.5|2)
+    //    Pi (bar, presión interior; 0 = sin presión), kPaBar (100 SI; Tuyper usa 98), wf (factor peso propio: PVC 1, PE ≈0.65)
+    const DN=p.DN/1000, rm=(p.DN-p.e)/2000, H=p.H, B=p.B, g=p.gamma;
+    const {E1,E2,E3,E4}=p;
+    const phi=PHI[p.fill], dl=DELTA[p.fillInst]*phi*Math.PI/180, K1=0.5;
+    const x=2*K1*Math.tan(dl)*H/B, k90 = x>0 ? (1-Math.exp(-x))/x : 1;
+    const Cz = p.beta<90 ? (1-p.beta/90)+p.beta/90*k90 : k90;
+    // zanja terraplenada: el terraplén (Ht, γt) sobre la zanja actúa como sobrecarga uniforme reducida por el silo: κ0 = e^−x
+    const zt=p.inst==='zanjaterr', Ht=zt?(p.Ht||0):0, gt=p.gammaT||g, k0=Math.exp(-x);
+    const C0 = p.beta<90 ? (1-p.beta/90)+p.beta/90*k0 : k0, sT=C0*gt*Ht;
+    const K2=K2G[p.fill2], Pj=1;
+    const xb=B/DN-1, xi=(1.662+0.639*xb)/(xb+(1.662-0.361*xb)*E2/E3), Ssh=0.6*xi*E2*1000;
+    const A=ANG[p.ang], CV2=-0.0640, Ch2=-0.0658;
+    const mm=1+(H/DN)/(3.5/Pj+2.2*E1/(E4*(Pj-0.25))+(H/DN)*(0.62/Pj+1.6*E1/(E4*(Pj-0.25))));
+    const m0=4*K2/(3+K2), V0=(1-K2)*Pj/(Pj-0.25);
+    let He=H+Ht, Pvc=0, Pvr=0, Cd=0;
+    if(p.pav){ const q=p.pav; He+=0.9*(q.h1*Math.cbrt(q.Ef1)+q.h2*Math.cbrt(q.Ef2))/Math.cbrt(E1); }
+    if(p.veh){ const v = p.veh==='custom' ? p.vehX : VEH[p.veh]; Pvc=trafico(He,DN,v); }
+    // sobrecarga repartida rectangular (Pd kN/m², largo l, ancho a) centrada sobre el tubo: Boussinesq integrado (Newmark), Cd = 4·I(a/2He, l/2He)
+    if(p.rep){ Cd=p.rep.Cd!=null?p.rep.Cd:cdRect(p.rep.a/(2*He), p.rep.l/(2*He)); Pvr=p.rep.Pd*Cd*(p.rep.imp==='cadenas'?1.2:1.0); }
+    const Pover=Pvc+Pvr;
+    const pe=10*((p.Ha||0)+DN/2);
+    const rmeq=(p.DN-p.eeq)/2, e=p.eeq/1000, wf=p.wf||1;
+    // presión interior (bar → kN/m²): esfuerzo de membrana Npa = Pi·ri y momento local Mpa = Pi·e²/12
+    const Pi=(p.Pi||0)*(p.kPaBar||100), ri=(p.DN-2*p.e)/2000, Npa=Pi*ri, Mpa=Pi*(p.e/1000)**2/12;
+    const out={He, Pvc, Pvr, Cd, Cz, C0, sT, Ssh, xi, pe, mm, Pi, Npa, Mpa};
+    for(const t of ['LP','CP']){
+      const St=p.E[t]*p.eeq**3/(12*rmeq**3)*1000;
+      const Vts=St/Ssh, dlt=A.Ch1/(Vts-Ch2), cv=A.CV1+CV2*dlt;
+      const Vs=St*Pj/(Math.abs(cv)*E2*1000);
+      const m1=(mm*Vs+(mm-1)*m0*V0/(1-m0))/(Vs+(mm-1)*V0/(1-m0));
+      const r=B/DN, m=(p.inst==='terraplen'||r>=4) ? m1 : (m1-1)/3*r+(4-m1)/3, n=(4-m1)/3;
+      const qv=m*Cz*g*H+m1*sT, qh=n*K2*(Cz*g*H+(p.qhT===0?0:sT)), qvt=qv+Pover, qht=dlt*(qv-qh);
+      const Dv=Math.abs(cv)*(qvt-qh)/St*100, rm2=rm*rm;
+      const M=[0,1,2].map(i=>A.mq[i]*qvt*rm2+[-0.25,0.25,-0.25][i]*qh*rm2+[-0.181,0.208,-0.181][i]*qht*rm2+wf*A.mt[i]*e*rm2+A.ma[i]*rm**3+Mpa);
+      const N=[0,1,2].map(i=>A.nq[i]*qvt*rm+[-1,0,-1][i]*qh*rm+[-0.577,0,-0.577][i]*qht*rm+wf*A.nt[i]*e*rm+A.na[i]*rm2+Npa);
+      const sig=[0,1,2].map(i=>{ const ak = M[i]>0 ? 1+p.eeq/(3*rm*1000) : 1-p.eeq/(3*rm*1000); return N[i]/p.eeq+6*Math.abs(M[i])*1000/p.eeq**2*ak; });
+      const eta=sig.map(s=>p.sig[t]/Math.abs(s));
+      const n1=2*Math.sqrt(St*Ssh)/qvt, aD=alphaD(Vts,rm,e), n2=aD*St/pe, n3=1/(1/n1+1/n2);
+      out[t]={St,Vts,delta:dlt,cv,Vs,m1,m,qv,qh,qvt,qht,Dv,M,N,sig,eta,n1,n2,n3,aD,aDout:adOut(Vts,rm,e)};
+    }
+    const seg=p.seg||2.5, chk=[];
+    for(const t of ['LP','CP']){ const R=out[t];
+      chk.push({t,que:'Deformación',val:R.Dv,lim:5,ok:R.Dv<=5,unit:'%',menor:true});
+      ['clave','riñones','base'].forEach((z,i)=>chk.push({t,que:'Rotura en '+z,val:R.eta[i],lim:seg,ok:R.eta[i]>=seg}));
+      chk.push({t,que:'Aplastamiento (terreno)',val:R.n1,lim:seg,ok:R.n1>=seg});
+      chk.push({t,que:'Aplastamiento (agua exterior)',val:R.n2,lim:seg,ok:R.n2>=seg});
+      chk.push({t,que:'Aplastamiento (terreno + agua)',val:R.n3,lim:seg,ok:R.n3>=seg});
+    }
+    out.checks=chk; out.ok=chk.every(c=>c.ok);
+    return out;
+  }
+  return {calc, VEH, PHI, ANG, cdRect};
+})();
+if(typeof module!=='undefined') module.exports=MEC;
+
+</script>
+<script>
+const PRODUCTS=[
+ {id:"ecosan",name:"GPF ecoSan",desc:"PVC-U pared estructurada tipo A, interior y exterior lisos, ≥ 60 % reciclado certificado · UNE-EN 13476-2",series:[
+   {s:"SN4",dn:[["110",103.6],["125",118.6],["160",152.0],["200",190.2],["250",238.0],["315",300.6],["400",381.6],["500",476.8],["630",601.2],["800",760.8]]},
+   {s:"SN8",dn:[["110",103.6],["125",118.0],["160",150.4],["200",187.6],["250",235.4],["315",296.4],["400",376.2],["500",471.2],["630",594.4],["800",753.2]]}]},
+ {id:"pvc1401",name:"GPF PVC Compacto",desc:"PVC-U compacto saneamiento, teja, junta elástica · UNE-EN 1401-1",series:[
+   {s:"SN2",dn:[["160",153.6],["200",192.2],["250",240.2],["315",302.6],["400",384.2],["500",480.4],["630",605.4],["710",682.2],["800",768.6]]},
+   {s:"SN4",dn:[["110",103.6],["125",118.6],["160",152.0],["200",190.2],["250",237.6],["315",299.6],["400",380.4],["500",475.4],["630",599.2],["710",675.2],["800",760.8]]},
+   {s:"SN8",dn:[["110",103.6],["125",117.6],["160",150.6],["200",188.2],["250",235.4],["315",296.6],["400",376.6],["500",470.8],["630",593.2],["710",668.4],["800",753.2]]}]},
+ {id:"pvc1452",name:"GPF PVC Presión (saneamiento W+P)",desc:"PVC-U compacto con presión, marcado W+P · UNE-EN ISO 1452. Solo serie PN6 por ahora",series:[
+   {s:"PN6",dn:[["110",104.6],["125",118.8],["160",152.0],["200",190.2],["250",237.6],["315",299.6],["355",337.6],["400",380.4],["500",475.4],["630",599.2],["710",675.2],["800",760.8]]}]},
+ {id:"condusan",name:"GPF Condusan (PE corrugado)",desc:"Polietileno corrugado doble pared tipo B, interior liso blanco · UNE-EN 13476-3",series:[
+   {s:"SN4",dn:[["315 OD",265],["400 OD",342],["500 OD",425],["630 OD",541],["800 OD",685],["1000 OD",858]]},
+   {s:"SN8",dn:[["160 OD",136],["200 OD",172],["250 OD",213],["315 OD",265],["300 ID",300],["400 OD",342],["400 ID",400],["500 OD",425],["500 ID",500],["630 OD",541],["600 ID",600],["800 OD",685],["1000 OD",858]]}]}
+];
+
+// Criterios de proyecto. n = Manning para PVC/plástico; k = rugosidad Colebrook (mm). vmax/fill por tipo de red [residuales, pluviales-unitarias].
+const PRESSURE=[{"id":"pvcpres","name":"GPF PVC Presión","desc":"PVC-U compacto, gris, junta elástica · UNE-EN ISO 1452 · marcado W+P desde DN 110 (saneamiento con presión)","series":[{"s":"PN6","dn":[["63",59.0],["75",70.4],["90",84.4],["110",104.6],["125",118.8],["140",133.0],["160",152.0],["180",171.2],["200",190.2],["225",214.0],["250",237.6],["280",266.2],["315",299.6],["355",337.6],["400",380.4],["450",428.0],["500",475.4],["560",532.6],["630",599.2],["710",675.2],["800",760.8]]},{"s":"PN7,5","dn":[["110",103.6],["125",117.6],["140",131.8],["160",150.6],["180",169.4],["200",188.2],["225",211.8],["250",235.4],["280",263.6],["315",296.6],["355",334.2],["400",376.6],["450",423.6],["500",470.8],["560",527.2],["630",593.2],["710",668.6],["800",753.4]]},{"s":"PN8","dn":[["63",58.0],["75",69.2],["90",83.0],["110",103.2],["125",117.2],["140",131.4],["160",150.2],["180",169.0],["200",187.6],["225",211.2],["250",234.6],["280",262.8],["315",295.6],["355",333.2],["400",375.4],["450",422.4],["500",469.4],["560",525.6],["630",591.4],["710",666.4],["800",751.0]]},{"s":"PN10","dn":[["63",57.0],["75",67.8],["90",81.4],["110",101.6],["125",115.4],["140",129.2],["160",147.6],["180",166.2],["200",184.6],["225",207.8],["250",230.8],["280",258.6],["315",290.8],["355",327.8],["400",369.4],["450",415.6],["500",461.8],["560",517.2],["630",581.8],["710",655.6],["800",738.8]]},{"s":"PN12,5","dn":[["63",55.4],["75",66.0],["90",79.2],["110",99.4],["125",113.0],["140",126.6],["160",144.6],["180",162.8],["200",180.8],["225",203.4],["250",226.2],["280",253.2],["315",285.0],["355",321.2],["400",361.8],["450",407.0],["500",452.2],["560",506.6],["630",570.0]]},{"s":"PN16","dn":[["63",53.6],["75",63.8],["90",76.6],["110",96.8],["125",110.2],["140",123.4],["160",141.0],["180",158.6],["200",176.2],["225",198.2],["250",220.4],["280",246.8],["315",277.6],["355",312.8],["400",352.6],["450",396.6],["500",440.6]]},{"s":"PN20","dn":[["63",51.4],["75",61.4],["90",73.6],["110",93.8],["125",106.6],["140",119.4],["160",136.4],["180",153.4],["200",170.6],["225",191.8],["250",213.2],["280",238.8],["315",268.6],["355",302.8],["400",341.2],["450",383.8],["500",426.4]]},{"s":"PN25","dn":[["110",90.0],["125",102.2],["140",114.6],["160",130.8],["180",147.2],["200",163.6]]}]},{"id":"pvco","name":"GPF PVC Biorientado","desc":"PVC-O clase 500, junta elástica · UNE-EN 17176","series":[{"s":"PN12,5","dn":[["110",106.0],["125",120.6],["140",135.0],["160",154.4],["200",193.0],["225",217.0],["250",241.2],["315",304.0],["355",342.6],["400",386.0],["450",434.2],["500",482.4],["630",608.0]]},{"s":"PN16","dn":[["110",105.2],["125",119.4],["140",133.8],["160",153.0],["200",191.2],["225",215.0],["250",239.0],["315",301.2],["355",339.4],["400",382.4],["450",430.2],["500",478.0],["630",602.4]]},{"s":"PN20","dn":[["90",85.0],["110",103.8],["125",118.0],["140",132.2],["160",151.2],["200",189.0],["225",212.6],["250",236.2],["315",297.6],["355",335.4],["400",378.0],["500",472.6]]},{"s":"PN25","dn":[["90",83.8],["110",102.4],["125",116.4],["140",130.4],["160",149.0],["200",186.2],["225",209.6],["250",232.8],["315",293.4],["355",330.6],["400",372.6],["500",465.8]]}]},{"id":"tuplen","name":"GPF TUPLEN polietileno","desc":"PE100, negro con bandas azules · UNE-EN 12201","series":[{"s":"PN4","dn":[["355",337.6],["400",380.4],["500",475.4],["630",599.2],["710",675.2],["800",760.8],["1000",951.0]]},{"s":"PN6","dn":[["50",46.0],["63",58.0],["75",69.2],["90",83.0],["110",101.6],["125",115.4],["140",129.2],["160",147.6],["180",166.2],["200",184.6],["225",207.8],["250",230.8],["280",258.6],["315",290.8],["355",327.8],["400",369.4],["450",415.6],["500",461.8],["560",517.2],["630",581.8],["710",655.6],["800",738.8],["900",831.2],["1000",923.6]]},{"s":"PN8","dn":[["110",99.4],["125",113.0],["140",126.6],["160",144.6],["180",162.8],["200",180.8],["225",203.4],["250",226.2],["280",253.2],["315",285.0],["355",321.2],["400",361.8],["450",407.0],["500",452.2],["560",506.6],["630",570.0],["710",642.2],["800",723.8],["900",814.2]]},{"s":"PN10","dn":[["32",28.0],["40",35.2],["50",44.0],["63",55.4],["75",66.0],["90",79.2],["110",96.8],["125",110.2],["140",123.4],["160",141.0],["180",158.6],["200",176.2],["225",198.2],["250",220.4],["280",246.8],["315",277.6],["355",312.8],["400",352.6],["450",396.6],["500",440.6],["560",493.6],["630",555.2],["710",625.8],["800",705.2],["900",793.4],["1000",881.4]]},{"s":"PN12,5","dn":[["110",93.8],["125",106.6],["140",119.4],["160",136.4],["180",153.4],["200",170.6],["225",191.8],["250",213.2],["280",238.8],["315",268.6],["355",302.8],["400",341.2],["450",383.8],["500",426.4],["560",477.6]]},{"s":"PN16","dn":[["20",16.0],["25",20.4],["32",26.0],["40",32.6],["50",40.8],["63",51.4],["75",61.4],["90",73.6],["110",90.0],["125",102.2],["140",114.6],["160",130.8],["180",147.2],["200",163.6],["225",184.0],["250",204.6],["280",229.2],["315",257.8],["355",290.6],["400",327.4],["450",368.2],["500",409.2],["560",458.4],["630",515.6]]},{"s":"PN20","dn":[["32",24.8],["40",31.0],["50",38.8],["63",48.8],["75",58.2],["90",69.8],["110",85.4],["125",97.0],["140",108.6],["160",124.2],["180",139.8],["200",155.2],["225",174.6],["250",194.2],["280",217.4],["315",244.6],["355",275.6],["400",310.6],["450",349.4],["500",388.4]]},{"s":"PN25","dn":[["20",14.0],["25",18.0],["32",23.2],["40",29.0],["50",36.2],["63",45.8],["75",54.4],["90",65.4],["110",79.8],["125",90.8],["140",101.6],["160",116.2],["180",130.8],["200",145.2],["225",163.4],["250",181.6],["280",203.4],["315",228.8],["400",290.6]]}]}];
+let MODE="grav";
+const NORMAS=[
+ {id:"une752",name:"Genérico UNE-EN 752 (k 0,25 mm)",formula:"colebrook",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[3.0,5.0,5.0],fill:[75,85,75],dnmin:300,dnref:"OD",hint:"Colebrook con rugosidad de servicio k = 0,25 mm. Límites orientativos habituales: v 0,6–3 m/s residuales, 5 m/s pluviales y unitarias; llenado 75 % residuales/unitarias, 85 % pluviales; DN mín. 300."},
+ {id:"cyii",name:"Canal de Isabel II (Madrid)",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[3.0,5.0,5.0],fill:[75,85,75],dnmin:400,dnref:"OD",hint:"Normas para Redes de Saneamiento v3 (2020). No fija fórmula ni n (se toma Manning 0,010); v ≥ 0,6 m/s con Q mín.; ≤ 3 m/s residuales (y en unitarias con el punta de residuales), ≤ 5 m/s pluviales/unitarias con Q máx.; llenado 75 % residuales y unitarias, 85 % pluviales; DN mín. 400 en colectores; pendiente orientativa 1–4 %.",src:"https://www.canaldeisabelsegunda.es/documents/20143/79037/2016_Normas_Redes_Saneamiento.pdf/e1461e6b-3e64-8356-2b8f-05ee9845c4d8"},
+ {id:"emasesa",name:"EMASESA (Sevilla)",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[6.0,6.0,6.0],fill:[100,100,100],dnmin:300,dnref:"OD",hint:"PD005.12 rev. 8 (2022). Manning n = 0,010 gres/PVC-U; v ≥ 0,6 m/s con Q de diseño residual (procurar 0,9); ≤ 6 m/s en PVC-U y gres (3 m/s hormigón/fundición); no fija % de llenado y su tabla de caudales específicos equivale a sección llena (se toma 100 %); DN mín. 300. Baja el calado si el proyecto lo exige.",src:"https://www.emasesa.com/wp-content/uploads/2022/06/DOC20220630120535InstruccionesTecnicasRedesSaneamientoPD00512Rev08.pdf"},
+ {id:"emacsa",name:"EMACSA (Córdoba)",formula:"colebrook",k:0.25,n:0.010,vmin:[0.6,0.9,1.0],vmax:[3.0,6.0,6.0],fillQ:[75,75,75],dnmin:400,dnref:"OD",hint:"NE NT 002 v8 (2024). Colebrook k = 0,25 mm o Manning n = 0,010 para PVC/PE/PP; v ≥ 0,6 m/s a Q mín. residuales, ≥ 0,9 m/s pluviales y ≥ 1 m/s unitarias a Q máx.; ≤ 3 m/s residuales, ≤ 6 m/s pluviales/unitarias; el caudal máximo no debe superar el 75 % del de sección llena (equivale a un calado del 65 % aprox.); DN mín. red plástica 400.",src:"https://www.emacsa.es/wp-content/uploads/2014/10/NENT002.pdf"},
+ {id:"huesna",name:"Aguas del Huesna (Sevilla)",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[3.0,4.0,5.0],fill:[75,75,75],dnmin:300,dnref:"ID",hint:"Normativa Técnica de Saneamiento (BOP 2002). Manning n = 0,010 PVC/PEAD; v ≥ 0,6 m/s (0,4 con caudal nocturno); ≤ 3 m/s residuales, ≤ 4 m/s pluviales, ≤ 5 m/s unitarias en PVC/PEAD; llenado 75 % residuales (se toma también en pluviales/unitarias); DN mín. 300 DN/ID (en PVC DN/OD equivale a 315).",src:"https://www.aguasdelhuesna.com/export/sites/aguasdelhuesna/.galleries/documentos-normativa/SANEAMIENTO.pdf"},
+ {id:"algeciras",name:"EMALGESA (Algeciras)",formula:"colebrook",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[3.0,3.0,3.0],fill:[75,85,75],dnmin:300,dnref:"OD",hint:"Normas Técnicas de Saneamiento (2021). Darcy-Weisbach + Colebrook-White (k no tabulado: se toma 0,25 mm); v ≥ 0,6 m/s a Q mín. = 0,25·Q medio; ≤ 3 m/s en general para cualquier red y nunca > 5; llenado 75 % residuales/unitarias, 85 % pluviales; DN mín. 300.",src:"https://www.algeciras.es/export/sites/algeciras/.galleries/publicaciones/documentos/NORMAS-TECNICAS-DEL-SERVICIO-DE-SANEAMIENTO.pdf"},
+ {id:"valencia",name:"Ciclo Integral del Agua (València)",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.9,0.9],vmax:[3.0,4.0,4.0],fill:[100,100,100],dnmin:400,dnref:"ID",hint:"Normativa para Obras de Saneamiento (1999). Manning n = 0,010 PVC/PE; v ≥ 0,6 m/s residuales, ≥ 0,9 m/s pluviales/unitarias con Q2 (y 0,3 con Qr en unitaria); ≤ 3 m/s residuales, ≤ 4 m/s pluviales/unitarias; dimensiona a sección llena; diámetro INTERIOR mín. 400 (en PVC DN/OD equivale a 450).",src:"https://www.ciclointegraldelagua.com/castellano/normativa-documentacion.php"},
+ {id:"bcasa",name:"BCASA (Barcelona)",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[10.0,10.0,10.0],fill:[75,75,75],dnmin:500,dnref:"ID",hint:"Guia de criteris tècnics (2015). No fija fórmula ni n (se toma Manning 0,010); v ≥ 0,6 m/s con Q mín. residuales; ≤ 10 m/s en plástico con lluvia T = 0,5 años (6 en hormigón); pendiente 1 % recomendable; diámetro INTERIOR mín. 500 en red nueva. Llenado no fijado: se toma 75 %.",src:"https://w110.bcn.cat/HabitatUrba/Continguts/Grup_denllacos/Minisites/PrescripcionsTecniques/Documentaci%C3%B3%20per%20%C3%A0mbits/BCASA_GuiaTecnicaClavegueram_setembre2015.pdf"},
+ {id:"itohg",name:"Augas de Galicia (ITOHG)",formula:"manning",k:0.25,n:0.012,vmin:[0.6,0.6,0.6],vmax:[6.0,6.0,6.0],fill:[75,75,75],dnmin:300,dnref:"OD",hint:"ITOHG SAN-1/3 (2009). Manning n = 0,012 plástico en líneas simples (0,014 con pozos); v ≥ 0,6 m/s a diario; ≤ 6 m/s en PVC y gres (3 hormigón/fundición); llenado 75 %; DN mín. 300; pendientes mínimas por diámetro en SAN-1/2.",src:"https://augasdegalicia.xunta.gal/c/document_library/get_file?file_path=/portal-augas-de-galicia/itohg/ITOHG_SAN_1_3_Conduccions_c_hidr_gl.pdf"},
+ {id:"emaya",name:"EMAYA (Palma)",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[5.0,5.0,5.0],fill:[75,75,75],dnmin:315,dnref:"OD",hint:"XR-028-E02 (2020). No fija fórmula ni n (se toma Manning 0,010); caudales × 1,5; v 0,6–5 m/s; DN mín. 315; pendientes mín./máx. por diámetro (DN 300: 6–80 ‰). Llenado no fijado: se toma 75 %.",src:"https://www.emaya.es/media/8826/xr-028-e02-normas-te-cnicas-para-obras-de-alcantarillado-sanitario.pdf"},
+ {id:"pamplona",name:"Mancomunidad de Pamplona (SCPSA)",formula:"manning",k:0.25,n:0.014,vmin:[0.6,0.6,0.6],vmax:[5.0,5.0,5.0],fill:[70,80,80],dnmin:315,dnref:"OD",hint:"Ordenanza de redes de saneamiento (ed. 2020, sustituye a la de 2007). Manning n = 0,014 cualquier material; v 0,6–5 m/s en PVC (4 hormigón); llenado (calado/diámetro) 70 % fecales, 80 % pluviales y unitarias; DN mín. 300 (DN 315 en PVC); acometida DN 160, sumidero DN 200.",src:"https://sedeelectronica.mcp.es/sites/default/files/normativa/Tecnica/redes_saneamiento_2019-emord-003_castellano.pdf"},
+ {id:"teidagua",name:"Teidagua (Tenerife)",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[6.0,6.0,6.0],fill:[75,90,90],dnmin:300,dnref:"ID",hint:"Pliego de saneamiento (2008). Manning n = 0,014 general o 0,008–0,010 PVC (se toma 0,010); v 0,6–6 m/s en PVC (4 hormigón); llenado 75 % residuales, 90 % unitarias/pluviales; pendiente mín. 1 %; DN mín. 300 DN/ID.",src:"https://www.teidagua.es/documents/881520/6805420/PLIEGO_SANEAMIENTO.pdf/2bb8b6fa-9243-f7ec-468c-0705504c5c1c"},
+ {id:"tecvasa",name:"Tecvasa (Aguas de Valencia)",formula:"colebrook",k:0.25,n:0.010,vmin:[0.5,0.5,0.5],vmax:[5.0,5.0,5.0],fill:[50,50,50],dnmin:300,dnref:"OD",hint:"NTS-99-001. Colebrook k = 0,10 mm tramos rectos / 0,25 mm con acometidas (se toma 0,25) o Manning n = 0,010 PVC; v 0,5–5 m/s; llenado 50 %; DN mín. 300. Red separativa estricta: no admite pluviales ni unitarias en saneamiento.",src:"https://www.vallada.es/sites/www.vallada.es/files/Normas%20T%C3%A9cnicas%20Saneamiento%20Tecvasa.pdf"},
+
+ {id:"giahsa",name:"GIAHSA (Huelva, MAS)",formula:"manning",k:0.25,n:0.010,vmin:[0.5,0.6,0.6],vmax:[3.0,4.5,4.5],fill:[75,75,75],dnmin:400,dnref:"ID",hint:"OTR Saneamiento (BOP Huelva 2009). Manning sin fijar n (se toma 0,010); residuales 0,5–3 m/s a Qr; pluviales/unitarias 0,6–4,5 m/s (v mín. con Q2 = 0,4·Q25); llenado no fijado (se toma 75 %); diámetro INTERIOR mín. 400 residuales/unitarias (300 pluviales); pendiente mín. 5 ‰; T 10 años secundarias / 25 generales.",src:"https://www.giahsa.com/documents/d/giahsa/otr_saneamiento"},
+ {id:"ecija",name:"Consorcio de Aguas de Écija (Sevilla)",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.9,0.3],vmax:[3.0,4.0,5.0],fill:[75,75,75],dnmin:400,dnref:"ID",hint:"IT Redes de Saneamiento rev. 1 (2010). Manning n = 0,010 PVC/PRFV/PP; residuales 0,6–3 m/s, pluviales 0,9–4, unitarias 0,3–5 (plástico); llenado 75 % residuales a Q máx. (se toma en el resto); DN/ID mín. 400, acometida 160–200; T 25 años, dotación 330 l/hab·día, Cp 2,4.",src:"http://www.consoraguasecija.es/epeciar/pdf/ITSANEAMIENTOREVDIC2010.pdf"},
+ {id:"acosol",name:"ACOSOL (Costa del Sol Occidental)",formula:"colebrook",k:0.25,n:0.009,vmin:[0.6,0.6,0.6],vmax:[3.0,5.0,5.0],fill:[75,85,75],dnmin:300,dnref:"ID",hint:"PCT Abastecimiento y Saneamiento (2003, act. 2010). PVC/PE: k 0,10–0,25 mm (Colebrook) o n 0,008–0,012 (0,009 usual); diámetro interior mín. 300, > 500 en fundición u hormigón; redes separativas. No fija velocidades, llenado, pendiente ni T: se toman los genéricos UNE-EN 752.",src:"https://web.archive.org/web/20250618234806/https://www.acosol.es/sites/default/files/inline-files/20190130-PCTABASTECIMIENTOYSANEAMIENTOACOSOL2003.pdf"},
+ {id:"arcos",name:"Arcos de la Frontera (Cádiz) · plantilla Aqualia",formula:"colebrook",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[3.0,3.0,3.0],fill:[75,85,75],dnmin:300,dnref:"OD",hint:"Normas Técnicas de Saneamiento rev. 0 (2021), misma plantilla que EMALGESA: Colebrook-White (k sin fijar, se toma 0,25); v ≤ 3 m/s en general (nunca > 5) a Q máx., ≥ 0,6 a Q mín. = 0,25·Q med; llenado 75 % residuales/unitarias, 85 % pluviales; DN mín. 300, acometidas 200; pendiente orientativa 0,5–4 %; T 10 años.",src:"https://gobiernoabierto.dipucadiz.es/uploads/indicadores/1649760029344.pdf"},
+ {id:"granada",name:"Granada · PGOU 2001 (ámbito Emasagra)",formula:"manning",k:0.25,n:0.012,vmin:[0.6,0.6,0.6],vmax:[3.0,3.0,3.0],fill:[75,75,75],dnmin:400,dnref:"OD",hint:"Ordenanza de proyectos de urbanización, art. 1.4.2. Manning n ≤ 0,012; v 0,6–3 m/s; DN mín. 400 red, 200 acometida; pendiente mín. 5 ‰ red; T 10 años, dotación 500 l/hab·día, Cp 2,4. No fija llenado (se toma 75 %). Emasagra no publica normas propias de red.",src:"https://www.granada.org/pgo.nsf/029d8969c68d32a9c1256690003dd916/9625bc2067cf9c6bc12568cd00365634!OpenDocument"},
+ {id:"ubeda",name:"Úbeda (Jaén) · Ordenanza municipal",formula:"manning",k:0.25,n:0.010,vmin:[0.5,0.5,0.5],vmax:[3.5,3.5,3.5],fill:[75,90,90],dnmin:300,dnref:"OD",hint:"Normas técnicas de saneamiento de la Ordenanza de urbanización (BOP Jaén 2010). Manning (n no fijado, se toma 0,010); v 0,5–3,5 m/s; llenado 75 % residuales, 90 % unitarias/pluviales; DN mín. 300 red, 200 injerencia; pendientes D200–300 3 ‰, D300–600 2 ‰, D600–1000 1 ‰.",src:"https://aytoubeda.transparencialocal.gob.es/es_ES/media/14595"},
+ {id:"besos",name:"Consorci Besòs Tordera (Catalunya)",formula:"manning",k:0.25,n:0.014,vmin:[0.6,0.6,0.6],vmax:[5.0,5.0,5.0],fill:[75,75,75],dnmin:300,dnref:"ID",hint:"Prescripcions tècniques xarxes de sanejament (2013). Manning n = 0,014 cualquier material; v 0,6–5 m/s en PVC (4 hormigón); llenado 75 % a Q máx.; DN/ID mín. 300, acometida 160 DN/OD; pendiente mín. por DN (D300–600 5 ‰) y PVC ≥ 0,8 %.",src:"https://besos-tordera.cat/wp-content/uploads/2015/07/PRESCRIPCIONS_TECNIQUES_XARXES_DE_SANEJAMENT_agost_2013.pdf"},
+ {id:"mairaga",name:"Mancomunidad de Mairaga (Navarra)",formula:"manning",k:0.25,n:0.014,vmin:[0.6,0.6,0.6],vmax:[5.0,5.0,5.0],fill:[75,90,90],dnmin:300,dnref:"OD",hint:"Ordenanza de condiciones técnicas de las redes de saneamiento (2010). Manning n = 0,014 cualquier material; v 0,6–5 m/s en PVC (4 hormigón); llenado 75 % fecales, 90 % unitarias/pluviales; DN mín. 300 DN/OD (250 en PVC al inicio de ramal); PVC con pendiente > 0,8 %; colectores con i < 1 % se calculan con el 75 % de la pendiente real.",src:"http://mairaga.es/pdf/RedesSaneamiento.pdf"},
+{id:"arcgisa",name:"ARCGISA (Campo de Gibraltar)",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[6.0,6.0,6.0],fill:[100,100,100],dnmin:300,dnref:"OD",hint:"Normas Técnicas de Saneamiento rev. 1.01 (2008), método tipo EMASESA. Manning n = 0,010 PVC-U (0,013 fundición, 0,015 hormigón); v ≥ 0,6 m/s con Q residual (procurar 0,9); ≤ 6 m/s PVC/gres con Q pluvial (3 hormigón/fundición); capacidad a sección llena; DN mín. 300 fecales y 400 pluviales; T 15 años (25 en colectores principales); I1/Id = 8.",src:"https://www.arcgisa.es/Arcgisa/mostrararchivo.jsp?idarchivo=169694157223541525d80"},
+{id:"elx",name:"Aigües d'Elx (Elche)",formula:"manning",k:0.25,n:0.010,vmin:[0.5,0.5,0.5],vmax:[3.0,3.0,3.0],fill:[75,85,75],dnmin:400,dnref:"ID",hint:"Normativa para proyectos y obras de abastecimiento y alcantarillado (2002). Manning-Strickler sin fijar n (se toma 0,010) ni llenado (se toma 75/85 %); v 0,5–3 m/s; diámetro interior mín. 400; pendiente mín. 8 ‰; T 10 años o 160 l/s·ha en cuencas < 20 ha; 250 l/hab·día, Cp 2,4, retorno 0,8.",src:"https://www.aigueselx.com/documents/212137/538921/Normativa_tecnica_proyectos_y_obras.pdf/4cd71219-c4e5-ce95-5ce9-b67d102acbb4"},
+{id:"cartagena",name:"Cartagena · Ordenanza de alcantarillado",formula:"manning",k:0.25,n:0.010,vmin:[0.6,0.6,0.6],vmax:[3.0,3.0,3.0],fill:[75,85,75],dnmin:300,dnref:"OD",hint:"Ordenanza municipal reguladora del servicio de alcantarillado. No fija fórmula, n ni llenado (se toma Manning 0,010 y 75/85 %); v 0,6–3 m/s salvo justificación; DN mín. 300 red general, 200 acometida unifamiliar y sumidero, 300 plurifamiliar.",src:"https://www.cartagena.es/gestion/documentos/acuerdosynormativas/3112.pdf"},
+{id:"ficha",name:"Tubo nuevo (k de ficha GPF)",formula:"colebrook",k:0.007,n:0.009,vmin:[0.6,0.6,0.6],vmax:[3.0,5.0,5.0],fill:[75,85,75],dnmin:0,dnref:"OD",hint:"k = 0,007 mm declarado en la ficha técnica GPF. Solo para comparar: ningún gestor admite la rugosidad del tubo nuevo como valor de proyecto."},
+ {id:"libre",name:"Personalizado",formula:"colebrook",k:0.25,n:0.012,vmin:[0.6,0.6,0.6],vmax:[3.0,5.0,5.0],fill:[75,85,75],dnmin:0,dnref:"OD",hint:"Ajusta fórmula, coeficiente, pendiente y calado libremente. Sin DN mínimo."}
+];
+const G=9.81, NU=1.31e-6;
+
+function geom(D,f){ if(f>=1) return {A:Math.PI*D*D/4,Rh:D/4}; const th=2*Math.acos(1-2*f); const A=D*D/8*(th-Math.sin(th)), P=D*th/2; return {A,Rh:A/P}; }
+function vel(D,f,J,p){ const g=geom(D,f); if(p.formula==="manning") return (1/p.n)*Math.pow(g.Rh,2/3)*Math.sqrt(J); const Dh=4*g.Rh, k=p.k/1000; const s=Math.sqrt(2*G*Dh*J); return -2*s*Math.log10(k/(3.71*Dh)+2.51*NU/(Dh*s)); }
+function calc(Di_mm,f,J,p){ const D=Di_mm/1000; const g=geom(D,f); const v=vel(D,f,J,p); return {v,Q:v*g.A*1000,A:g.A,Rh:g.Rh}; }
+
+const $=id=>document.getElementById(id);
+let MECSRC="grav";
+const presCat=(m=MODE)=>m==="pres"||(m==="mec"&&MECSRC==="pres");
+function fillProducts(){ $("fam").innerHTML=""; (presCat()?PRESSURE:PRODUCTS).forEach(p=>$("fam").add(new Option(p.name,p.id))); }
+fillProducts();
+NORMAS.forEach(n=>$("norma").add(new Option(n.name,n.id)));
+const prod=()=>(presCat()?PRESSURE:PRODUCTS).find(p=>p.id===$("fam").value);
+const serie=()=>prod().series.find(s=>s.s===$("ser").value);
+const norma=()=>NORMAS.find(n=>n.id===$("norma").value);
+
+function fillSeries(){ const cur=$("ser").value; $("ser").innerHTML=""; prod().series.forEach(s=>$("ser").add(new Option(s.s,s.s))); if([...$("ser").options].some(o=>o.value===cur)) $("ser").value=cur; $("famhint").textContent=prod().desc; fillDN(); }
+function fillDN(){ const cur=$("dn").value; const row=serie(); $("dn").innerHTML=""; row.dn.forEach(([n,di])=>$("dn").add(new Option(`DN ${n} · Di ${di.toFixed(1).replace('.',',')}`,n))); const has=[...$("dn").options].some(o=>o.value===cur); $("dn").value=has?cur:(row.dn.find(x=>x[0].startsWith(presCat()?"200":"315"))?.[0]||row.dn[Math.floor(row.dn.length/2)][0]); }
+const redIdx=()=>({res:0,plu:1,uni:2})[$("red").value]||0;
+// Calado equivalente a un límite de Q/Qllena (bisección con Manning, independiente de n)
+function fillFromQ(pct){ const D=0.3, J=0.005, p={formula:"manning",n:0.01}; const full=calc(300,1,J,p).Q; let lo=0.05,hi=1; for(let i=0;i<40;i++){ const m=(lo+hi)/2; (calc(300,m,J,p).Q/full<pct/100)?lo=m:hi=m; } return Math.round(hi*100); }
+function fillLimit(n,r){ return n.fillQ?fillFromQ(n.fillQ[r]):n.fill[r]; }
+function applyNorma(){ const n=norma(); const r=redIdx(); $("formula").value=n.formula; $("coef").value=n.formula==="manning"?n.n:n.k; $("fill").value=fillLimit(n,r); $("normahint").innerHTML=n.hint+(n.src?` <a href="${n.src}" target="_blank" rel="noopener">Fuente</a>`:""); syncCoefLabel(); }
+function syncCoefLabel(){ const m=$("formula").value==="manning"; $("coeflabel").textContent=m?"n Manning":"k (mm)"; $("coef").step=m?"0.001":"0.01"; }
+const ERR=[];
+function num(id,label,{min=-Infinity,max=Infinity,gt=null}={}){ const el=$(id); const v=parseFloat(el.value); let bad=null; if(el.value===""||isNaN(v)) bad=`${label}: falta el valor`; else if(gt!==null&&v<=gt) bad=`${label}: debe ser mayor que ${gt}`; else if(v<min) bad=`${label}: mínimo ${min}`; else if(v>max) bad=`${label}: máximo ${max}`; el.classList.toggle("bad",!!bad); if(bad) ERR.push(bad); return bad?NaN:v; }
+function showErrors(){ let box=$("errbox"); if(!box){ box=document.createElement("div"); box.id="errbox"; box.className="errbox"; document.querySelector(".layout").before(box); } if(ERR.length){ box.innerHTML="<b>Datos no válidos, no se calcula:</b> "+ERR.join(" · "); box.hidden=false; } else box.hidden=true; }
+function params(){ const m=$("formula").value==="manning"; const c=num("coef",m?"n de Manning":"Rugosidad k",{gt:0}); const n=norma(); const r=redIdx(); const fm=n.fillQ?{pct:n.fillQ[r],mode:"Q",cal:fillLimit(n,r)}:{pct:n.fill[r],mode:"h",cal:n.fill[r]}; return {formula:m?"manning":"colebrook",k:m?n.k:c,n:m?c:n.n,vmin:n.vmin[r],vmax:n.vmax[r],fillmax:fm.cal,fillmode:fm,dnmin:n.dnmin,dnref:n.dnref,label:n.name}; }
+// DN mínimo del gestor: por DN/OD (nominal exterior) o por diámetro interior
+function dnOK(p,n,di){ if(!p.dnmin) return true; if(p.dnref==="ID") return di>=p.dnmin-0.5; const od=parseFloat(String(n)); return od>=p.dnmin; }
+function stateOf(p,n,di,r,f){ if(!dnOK(p,n,di)) return "dn"; if(f>p.fillmax/100+1e-9) return "fill"; if(r.v>p.vmax) return "crit"; if(r.v<p.vmin) return "warn"; return "ok"; }
+const fmt=(x,d=1)=>x.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtJ=J=>fmt(J*1000,J*1000<2?2:1);
+
+// ---- Presión ----
+function pparams(){ const hw=$("pformula").value==="hw"; const c=num("pcoef",hw?"C de Hazen-Williams":"Rugosidad k",{gt:0}); const vmin=num("vmin","v mín.",{min:0}), vmax=num("vmax","v máx.",{gt:0}); if(!isNaN(vmin)&&!isNaN(vmax)&&vmin>=vmax){ ERR.push("v mín. debe ser menor que v máx."); $("vmin").classList.add("bad"); } num("plen","Longitud",{gt:0}); return {formula:hw?"hw":"colebrook",k:hw?0.1:c,C:hw?c:150,vmin,vmax,nu:parseFloat($("temp").value)}; }
+function pcalc(Di_mm,Q_ls,p){ const D=Di_mm/1000, Q=Q_ls/1000, A=Math.PI*D*D/4, v=Q/A; let J;
+  if(p.formula==="hw"){ J=10.67*Math.pow(Q,1.852)/(Math.pow(p.C,1.852)*Math.pow(D,4.87)); }
+  else { const Re=v*D/p.nu; if(Re<2300){ J=32*p.nu*v/(G*D*D); } else { const k=p.k/1000; let f=0.02; for(let i=0;i<30;i++){ f=1/Math.pow(-2*Math.log10(k/(3.7*D)+2.51/(Re*Math.sqrt(f))),2); } J=f*v*v/(2*G*D); } }
+  return {v,J,A}; }
+function syncPCoefLabel(){ const hw=$("pformula").value==="hw"; $("pcoeflabel").textContent=hw?"C Hazen-Williams":"k (mm)"; }
+function renderPres(){
+  const p=pparams(); const Q=Math.pow(10,parseFloat($("pq").value)); const L=parseFloat($("plen").value)||1000;
+  $("pqout").textContent=fmt(Q,Q<10?2:Q<100?1:0)+" l/s";
+  const row=serie(), sel=$("dn").value;
+  if(document.documentElement.getAttribute("data-curves")==="1") drawPChart(row,sel,p,Q); else { cache=null; $("chart").innerHTML=""; } drawPResults(row,sel,p,Q,L); drawPTable(row,sel,p,Q,L); DIAL.drawPres(row,sel,p,Q,L);
+  $("charttitle").textContent=`${prod().name} ${row.s} · ${p.formula==="hw"?"Hazen-Williams C = "+fmt(p.C,0):"Colebrook-White k = "+fmt(p.k,3)+" mm"}`;
+  $("tabletitle").textContent=`Toda la gama ${prod().name} ${row.s} a ${fmt(Q,Q<10?2:1)} l/s`;
+  $("foot").innerHTML=`<b>Método.</b> Sección llena a presión. Colebrook-White con factor de fricción de Darcy-Weisbach (J = f·v²/2gD) y ν = ${p.nu===1.31e-6?"1,31":"1,01"}·10⁻⁶ m²/s; Hazen-Williams J = 10,67·Q^1,852/(C^1,852·D^4,87). Diámetros interiores De − 2e de las fichas técnicas de Grupo GPF (PVC-U UNE-EN ISO 1452 rev. 9, PVC-O UNE-EN 17176 rev. 9, PE100 UNE-EN 12201 rev. 5). Pérdida de carga por fricción en tubo recto; no incluye pérdidas localizadas. Las presiones nominales se refieren a agua a 20 °C.`;
+}
+const PQMIN=0.3,PQMAX=3000;
+function drawPChart(row,sel,p,Q){
+  const svg=$("chart"); const N=70;
+  const curves=row.dn.map(([n,di],i)=>{ const c=[]; for(let s=0;s<=N;s++){ const q=PQMIN*Math.pow(PQMAX/PQMIN,s/N); const r=pcalc(di,q,p); c.push({q,J:r.J*1000,v:r.v}); } return {n,di,c,color:rampColor(i,row.dn.length),sel:n===sel}; });
+  const YMIN=0.1,YMAX=1000; // m/km
+  const x=q=>ML+(Math.log10(q)-Math.log10(PQMIN))/(Math.log10(PQMAX)-Math.log10(PQMIN))*(W-ML-MR);
+  const y=j=>H-MB-(Math.log10(j)-Math.log10(YMIN))/(Math.log10(YMAX)-Math.log10(YMIN))*(H-MT-MB);
+  cache={curves,x,y,pres:true};
+  let g="";
+  const decades=(a,b,fn)=>{ for(let d=Math.log10(a);d<Math.log10(b);d++){ for(let m=1;m<10;m++){ const v=m*Math.pow(10,d); if(v<a-1e-9||v>b) continue; fn(v,m===1); } } fn(b,true); };
+  decades(1,PQMAX,(v,major)=>{ if(v<PQMIN) return; g+=`<line x1="${x(v)}" y1="${MT}" x2="${x(v)}" y2="${H-MB}" stroke="var(--grid)" stroke-width="${major?1.2:0.6}"/>`; if(major||String(v)[0]==="2"||String(v)[0]==="5") g+=`<text x="${x(v)}" y="${H-MB+18}" text-anchor="middle" font-size="12" font-family="JetBrains Mono" fill="var(--muted)">${fmt(v,0)}</text>`; });
+  decades(YMIN,YMAX,(v,major)=>{ g+=`<line x1="${ML}" y1="${y(v)}" x2="${W-MR}" y2="${y(v)}" stroke="var(--grid)" stroke-width="${major?1.2:0.6}"/>`; if(major||String(v)[0]==="2"||String(v)[0]==="5") g+=`<text x="${ML-8}" y="${y(v)+4}" text-anchor="end" font-size="12" font-family="JetBrains Mono" fill="var(--muted)">${fmt(v,v<1?1:0)}</text>`; });
+  g+=`<text x="${(ML+W-MR)/2}" y="${H-8}" text-anchor="middle" font-size="12" font-family="Archivo" font-weight="600" letter-spacing="1" fill="var(--muted)">CAUDAL  l/s</text>`;
+  g+=`<text transform="translate(16 ${(MT+H-MB)/2}) rotate(-90)" text-anchor="middle" font-size="12" font-family="Archivo" font-weight="600" letter-spacing="1" fill="var(--muted)">PÉRDIDA DE CARGA  m/km</text>`;
+  g+=`<line x1="${x(Q)}" y1="${MT}" x2="${x(Q)}" y2="${H-MB}" stroke="var(--brand)" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>`;
+  const clampY=j=>Math.max(YMIN,Math.min(YMAX,j));
+  [...curves.filter(c=>!c.sel),...curves.filter(c=>c.sel)].forEach(cv=>{
+    let seg="",state=null,lastIn=null;
+    const flush=()=>{ if(seg){ const dash=state==="low"?' stroke-dasharray="6 5"':state==="high"?' stroke-dasharray="1.5 4"':''; const col=cv.sel?"var(--brand)":(state==="low"?"var(--warn)":state==="high"?"var(--crit)":cv.color); g+=`<path d="${seg}" fill="none" stroke="${col}" stroke-width="${cv.sel?3:1.8}" stroke-linecap="round"${dash}${cv.sel?'':' opacity=".9"'}/>`; } seg=""; };
+    cv.c.forEach((pt,i)=>{ const inside=pt.J>=YMIN&&pt.J<=YMAX; if(!inside){ flush(); state=null; return; } const st=pt.v<p.vmin?"low":pt.v>p.vmax?"high":"ok"; if(st!==state){ const prev=cv.c[i-1]; flush(); state=st; seg=(prev&&prev.J>=YMIN&&prev.J<=YMAX)?`M${x(prev.q)} ${y(prev.J)} `:`M${x(pt.q)} ${y(pt.J)} `; } seg+=`L${x(pt.q)} ${y(pt.J)} `; lastIn=pt; });
+    flush();
+    if(lastIn){ const atEdge=lastIn!==cv.c[cv.c.length-1]; const lx=atEdge?x(lastIn.q):W-MR+6, ly=atEdge?MT-6:y(lastIn.J)+4; g+=`<text x="${lx}" y="${ly}" text-anchor="${atEdge?'middle':'start'}" font-size="${cv.sel?12.5:11}" font-family="JetBrains Mono" font-weight="${cv.sel?600:400}" fill="${cv.sel?'var(--brand)':'var(--muted)'}">${cv.n}</text>`; }
+    const r=pcalc(cv.di,Q,p); if(r.J*1000>=YMIN&&r.J*1000<=YMAX) g+=`<circle cx="${x(Q)}" cy="${y(r.J*1000)}" r="${cv.sel?5.5:3.5}" fill="${cv.sel?'var(--brand)':cv.color}" stroke="var(--panel)" stroke-width="2"/>`;
+  });
+  svg.innerHTML=g;
+}
+function pchip(v,p){ if(v<p.vmin) return `<span class="chip warn">v &lt; ${fmt(p.vmin)} m/s</span>`; if(v>p.vmax) return `<span class="chip crit">v &gt; ${fmt(p.vmax)} m/s</span>`; return `<span class="chip ok">Dentro de límites</span>`; }
+function drawPResults(row,sel,p,Q,L){
+  const [n,di]=row.dn.find(d=>d[0]===sel); const r=pcalc(di,Q,p);
+  $("results").innerHTML=`
+  <div class="tile"><div class="k">Tubo</div><div class="v" style="font-family:Archivo;font-size:20px">DN ${n} ${row.s}</div><div class="s">${prod().name} · Di ${fmt(di)} mm</div></div>
+  <div class="tile"><div class="k">Velocidad</div><div class="v">${fmt(r.v,2)}<span class="u">m/s</span></div>${pchip(r.v,p)}</div>
+  <div class="tile"><div class="k">Pérdida unitaria</div><div class="v">${fmt(r.J*1000,r.J*1000<10?2:1)}<span class="u">m/km</span></div><div class="s">${fmt(r.J*100,3)} m por 100 m</div></div>
+  <div class="tile"><div class="k">Pérdida en ${fmt(L,0)} m</div><div class="v">${fmt(r.J*L,2)}<span class="u">m.c.a.</span></div><div class="s">${fmt(r.J*L/10.2,2)} bar</div></div>
+  <div class="tile"><div class="k">Caudal a v máx.</div><div class="v">${fmt(p.vmax*r.A*1000,1)}<span class="u">l/s</span></div><div class="s">con v = ${fmt(p.vmax)} m/s</div></div>`;
+}
+function drawPTable(row,sel,p,Q,L){
+  let h=`<tr><th>Tubo</th><th>Di (mm)</th><th>v (m/s)</th><th>J (m/km)</th><th>ΔH en ${fmt(L,0)} m (m)</th><th>Q a v máx. (l/s)</th><th>Estado</th></tr>`;
+  row.dn.forEach(([n,di],i)=>{ const r=pcalc(di,Q,p); const st=r.v<p.vmin?"warn":r.v>p.vmax?"crit":"ok"; const txt={ok:"OK",warn:"v baja",crit:"v alta"}[st];
+    h+=`<tr class="${n===sel?"sel":""}"><td><span class="dot" style="background:${n===sel?'var(--brand)':rampColor(i,row.dn.length)}"></span>DN ${n}</td><td>${fmt(di)}</td><td>${fmt(r.v,2)}</td><td>${fmt(r.J*1000,r.J*1000<10?2:1)}</td><td>${fmt(r.J*L,2)}</td><td>${fmt(p.vmax*r.A*1000,1)}</td><td><span class="chip ${st}" style="margin:0">${txt}</span></td></tr>`; });
+  $("table").innerHTML=h;
+}
+// ---- Caudal de diseño ----
+function cpunta(P,met,custom){ const Pm=Math.max(P,1)/1000; if(met==="harmon") return 1+14/(4+Math.sqrt(Pm)); if(met==="babbitt") return Math.min(5/Math.pow(Pm,0.2),5); if(met==="gifft") return Math.min(5/Math.pow(Pm,1/6),5); if(met==="k24") return 2.4; return custom; }
+const CIUDADES=[["A Coruña",63.4,73.7,8],["Albacete",60.0,72.2,10],["Alicante",93.6,115.7,11],["Almería",57.4,70.4,10],["Badajoz",52.3,60.8,10],["Barcelona",110.0,134.1,11],["Bilbao",96.0,113.1,9],["Burgos",47.8,55.2,10],["Castellón",109.5,133.6,11],["Ceuta",93.0,112.1,10],["Ciudad Real",47.7,56.2,9],["Cuenca",55.0,65.3,10],["Cáceres",64.3,75.1,10],["Cádiz",86.5,103.2,8],["Córdoba",82.5,98.6,9],["Girona",99.4,118.6,11],["Granada",46.8,55.3,9],["Guadalajara",43.1,50.3,10],["Huelva",86.9,106.1,9],["Huesca",69.9,82.3,10],["Jaén",66.4,79.5,9],["Las Palmas de Gran Canaria",57.6,72.7,9],["León",48.3,56.2,9],["Lleida",58.1,68.6,11],["Logroño",48.8,57.5,10],["Lugo",67.8,78.8,8],["Madrid",46.6,54.3,10],["Melilla",92.4,114.1,11],["Murcia",105.0,129.8,11],["Málaga",114.7,138.8,10],["Ourense",66.8,77.5,8],["Oviedo",72.9,84.6,9],["Palencia",41.5,48.9,10],["Palma de Mallorca",62.1,72.2,11],["Pamplona",68.2,80.8,9],["Pontevedra",95.1,108.6,8],["Salamanca",42.3,49.1,10],["San Sebastián",103.5,121.2,9],["Santa Cruz de Tenerife",80.0,99.5,8],["Santander",87.7,102.4,9],["Segovia",39.4,45.2,10],["Sevilla",82.1,97.7,9],["Soria",50.6,59.6,10],["Tarragona (Reus)",100.3,120.4,11],["Teruel",56.3,66.6,11],["Toledo",49.2,59.0,10],["Valencia",132.0,164.0,11],["Valladolid",53.5,63.9,10],["Vitoria (Foronda)",61.6,71.9,9],["Zamora",42.7,50.4,10],["Zaragoza",57.3,68.2,10],["Ávila",47.6,57.1,10]];
+CIUDADES.forEach((c,i)=>$("ciudad").add(new Option(c[0],i)));
+function applyCiudad(){ const i=$("ciudad").value; if(i==="") return; const c=CIUDADES[i]; $("pd").value=($("tret").value==="25"?c[2]:c[1]); $("i1id").value=String(c[3]); }
+const IDF_EMASESA=[[10,83.3],[20,72.9],[30,61.5],[40,52.4],[50,43.4],[60,37.4],[90,28.9],[120,23.2],[150,18.5],[180,15.5]];
+function intensidad(){ const m=$("imet").value; const tmin=Math.max(5,parseFloat($("tc").value)||15);
+  if(m==="emasesa"){ const t=Math.min(180,Math.max(10,tmin)); for(let i=1;i<IDF_EMASESA.length;i++){ const [t0,i0]=IDF_EMASESA[i-1],[t1,i1]=IDF_EMASESA[i]; if(t<=t1) return i0+(i1-i0)*(t-t0)/(t1-t0); } return 15.5; }
+  if(m==="valencia"){ const dd=Math.max(10,tmin); return 54.69-0.8384*dd+5.566e-3*dd*dd+3.199/(0.02407+7.941e-4*dd-2.488e-6*dd*dd); }
+  if(m==="fabra"){ const T=$("tret").value==="10"?[26.9,7.1,0.789]:[24.0,5.2,0.734]; return 60*T[0]/Math.pow(tmin+T[1],T[2]); } if(m==="direct") return parseFloat($("ival").value)||0; if(m==="huesna") return 0.246*(parseFloat($("pd").value)||0);
+  const Pd=parseFloat($("pd").value)||0, r=parseFloat($("i1id").value), t=Math.max(5,parseFloat($("tc").value)||15)/60; const Id=Pd/24; return Id*Math.pow(r,(Math.pow(28,0.1)-Math.pow(t,0.1))/(Math.pow(28,0.1)-1)); }
+function flow(){ const P=num("pob","Población",{min:0}), D=num("dot","Dotación",{min:0}), cr=num("cret","Coef. retorno",{min:0,max:1}), inf=num("infil","Infiltración",{min:0}); num("area","Superficie",{min:0}); if($("cpmet").value==="custom") num("cpval","Cp",{min:1}); if($("imet").value==="direct") num("ival","Intensidad",{min:0}); else num("pd","Pd",{min:0}); if($("imet").value==="ic52") num("tc","t conc.",{min:5});
+  const Qm=P*D*cr/86400; const cp=cpunta(P,$("cpmet").value,parseFloat($("cpval").value)||2.4); const Qp=Qm*cp+inf; const Qmin=0.25*Qm+inf;
+  const A=parseFloat($("area").value)||0, C=parseFloat($("cesc").value), I=intensidad(); const Qpl=C*I*A/0.36;
+  const t=$("redtipo").value; const Qd=t==="res"?Qp:t==="plu"?Qpl:Qp+Qpl; return {Qm,cp,Qp,Qmin,A,C,I,Qpl,Qd,P}; }
+function minDN(row,Q,p,f,J){ for(const [n,di] of row.dn){ const r=calc(di,f,J,p); if(r.Q>=Q&&stateOf(p,n,di,r,f)==="ok") return {n,di,r}; } return null; }
+function renderFlow(){
+  const fl=flow(); const row=serie(); const p=params(); const J=Math.pow(10,parseFloat($("pend").value))/1000; const f=parseInt($("fill").value)/100;
+  $("cpval").disabled=$("cpmet").value!=="custom"; if($("cpmet").value!=="custom") $("cpval").value=fl.cp.toFixed(2);
+  const im=$("imet").value; $("ival").disabled=im!=="direct"; $("tc").disabled=!["ic52","emasesa","valencia","fabra"].includes(im); $("pd").disabled=!["ic52","huesna"].includes(im); $("i1id").disabled=im!=="ic52"; $("ciudad").disabled=!["ic52","huesna"].includes(im); $("tret").disabled=!["ic52","fabra"].includes(im); if(im!=="direct") $("ival").value=fl.I.toFixed(1);
+  drawFlowChart(fl);
+  const md=minDN(row,fl.Qd,p,f,J);
+  $("results").innerHTML=`
+  <div class="tile"><div class="k">Q medio residual</div><div class="v">${fmt(fl.Qm,2)}<span class="u">l/s</span></div><div class="s">${fmt(fl.P,0)} hab · ${$("dot").value} l/hab·día · retorno ${$("cret").value}</div></div>
+  <div class="tile"><div class="k">Q punta residual</div><div class="v">${fmt(fl.Qp,2)}<span class="u">l/s</span></div><div class="s">Cp = ${fmt(fl.cp,2)} · Q mín. ${fmt(fl.Qmin,2)} l/s</div></div>
+  <div class="tile"><div class="k">Q pluvial</div><div class="v">${fmt(fl.Qpl,fl.Qpl<10?2:0)}<span class="u">l/s</span></div><div class="s">C ${fmt(fl.C,2)} · I ${fmt(fl.I,1)} mm/h (${$("imet").options[$("imet").selectedIndex].text.split(":")[0]}) · ${fmt(fl.A,1)} ha</div></div>
+  <div class="tile"><div class="k">Caudal de diseño</div><div class="v" style="color:var(--brand)">${fmt(fl.Qd,fl.Qd<10?2:0)}<span class="u">l/s</span></div><div class="s">${{res:"residuales",plu:"pluviales",uni:"unitaria"}[$("redtipo").value]}</div></div>
+  <div class="tile"><div class="k">DN mínimo · ${prod().name} ${row.s}</div><div class="v" style="font-family:Archivo;font-size:20px">${md?"DN "+md.n:"Ninguno de la serie"}</div><div class="s">${md?`a ${fmtJ(J)} ‰ y ${Math.round(f*100)} %: ${fmt(md.r.Q,1)} l/s · ${fmt(md.r.v,2)} m/s`:"ningún DN cumple velocidad, calado y DN mínimo: cambia pendiente o serie"}</div></div>`;
+  $("charttitle").textContent=`Coeficiente punta según población · ${fmt(fl.P,0)} hab → Cp ${fmt(fl.cp,2)}`;
+  $("tabletitle").textContent=`DN mínimo de ${prod().name} ${row.s} para ${fmt(fl.Qd,fl.Qd<10?2:0)} l/s según pendiente (calado ${Math.round(f*100)} %, ${p.label})`;
+  let h=`<tr><th>Pendiente (‰)</th><th>DN mínimo</th><th>Di (mm)</th><th>Q disponible (l/s)</th><th>v (m/s)</th><th>Estado</th></tr>`;
+  [1,2,3,5,7.5,10,15,20,30,50].forEach(jp=>{ const m=minDN(row,fl.Qd,p,f,jp/1000); if(!m){ h+=`<tr><td>${fmt(jp,jp<2?1:0)}</td><td colspan="5" style="text-align:left;font-family:'Source Sans 3'">Ningún DN de la serie transporta el caudal cumpliendo el criterio (velocidad, calado y DN mínimo)</td></tr>`; return; }
+    h+=`<tr class="${Math.abs(jp-J*1000)<1e-6?"sel":""}"><td>${fmt(jp,jp<2?1:0)}</td><td>DN ${m.n}</td><td>${fmt(m.di)}</td><td>${fmt(m.r.Q,1)}</td><td>${fmt(m.r.v,2)}</td><td><span class="chip ok" style="margin:0">OK</span></td></tr>`; });
+  $("table").innerHTML=h;
+  $("foot").innerHTML=`<b>Método.</b> Q medio = población × dotación × coef. retorno / 86 400. Coeficiente punta: Harmon Cp = 1 + 14/(4 + √P), Babbitt Cp = 5/P^0,2, Gifft Cp = 5/P^(1/6) (P en miles de habitantes; tope 5), o valor fijo 2,4 (EMACSA NE NT 002, Huesna). Q mín. = 0,25·Q medio (criterio CYII). Pluviales por método racional Q = C·I·A/0,36 (l/s, mm/h, ha); intensidad por la Instrucción 5.2-IC: I_t = Id·(I1/Id)^((28^0,1 − t^0,1)/(28^0,1 − 1)) con Id = Pd/24, o por la expresión de Aguas del Huesna Ih = 0,246·P24; también la tabla IDF de EMASESA PD005.12 rev. 8 (interpolada), la curva IDF de València T = 25 (Normativa 1999, ec. 3) y la de Sherman del Observatori Fabra (Meteocat 2012, T = 10/25). Pd por capital: AEMET, Calendario Meteorológico 2015 (Gumbel, 1 día). Coeficientes de escorrentía de EMASESA PD005.12 y Huesna. Para cuencas grandes o con laminación, el gestor exigirá modelo hidráulico; este cálculo es un predimensionado.`;
+}
+function drawFlowChart(fl){
+  const svg=$("chart"); const XMIN=100,XMAX=1e6,YMIN=1,YMAX=5;
+  const x=P=>ML+(Math.log10(P)-Math.log10(XMIN))/(Math.log10(XMAX)-Math.log10(XMIN))*(W-ML-MR);
+  const y=c=>H-MB-(c-YMIN)/(YMAX-YMIN)*(H-MT-MB);
+  cache=null; let g="";
+  for(let d=2;d<=6;d++){ for(let m=1;m<10;m++){ const v=m*Math.pow(10,d); if(v>XMAX) break; g+=`<line x1="${x(v)}" y1="${MT}" x2="${x(v)}" y2="${H-MB}" stroke="var(--grid)" stroke-width="${m===1?1.2:0.6}"/>`; if(m===1||m===2||m===5) g+=`<text x="${x(v)}" y="${H-MB+18}" text-anchor="middle" font-size="12" font-family="JetBrains Mono" fill="var(--muted)">${fmt(v,0)}</text>`; } }
+  for(let c=1;c<=5;c+=0.5){ g+=`<line x1="${ML}" y1="${y(c)}" x2="${W-MR}" y2="${y(c)}" stroke="var(--grid)" stroke-width="${Number.isInteger(c)?1.2:0.6}"/>`; if(Number.isInteger(c)) g+=`<text x="${ML-8}" y="${y(c)+4}" text-anchor="end" font-size="12" font-family="JetBrains Mono" fill="var(--muted)">${fmt(c,1)}</text>`; }
+  g+=`<text x="${(ML+W-MR)/2}" y="${H-8}" text-anchor="middle" font-size="12" font-family="Archivo" font-weight="600" letter-spacing="1" fill="var(--muted)">POBLACIÓN  habitantes</text>`;
+  g+=`<text transform="translate(16 ${(MT+H-MB)/2}) rotate(-90)" text-anchor="middle" font-size="12" font-family="Archivo" font-weight="600" letter-spacing="1" fill="var(--muted)">COEFICIENTE PUNTA  Cp</text>`;
+  const mets=[["harmon","Harmon","var(--r6)"],["babbitt","Babbitt","var(--r4)"],["gifft","Gifft","var(--r2)"],["k24","Fijo 2,4","var(--r3)"]]; const cur=$("cpmet").value;
+  mets.forEach(([m,lab,col])=>{ let d=""; for(let i=0;i<=80;i++){ const P=XMIN*Math.pow(XMAX/XMIN,i/80); const c=Math.min(YMAX,cpunta(P,m,0)); d+=(i?"L":"M")+x(P)+" "+y(c)+" "; } const sel=m===cur; g+=`<path d="${d}" fill="none" stroke="${sel?'var(--brand)':col}" stroke-width="${sel?3:1.8}"${sel?'':' opacity=".85"'}/>`; const cEnd=Math.min(YMAX,cpunta(XMAX,m,0)); g+=`<text x="${W-MR+6}" y="${y(cEnd)+4}" font-size="${sel?12.5:11}" font-family="JetBrains Mono" font-weight="${sel?600:400}" fill="${sel?'var(--brand)':'var(--muted)'}">${lab}</text>`; });
+  const P=Math.min(XMAX,Math.max(XMIN,fl.P)); g+=`<line x1="${x(P)}" y1="${MT}" x2="${x(P)}" y2="${H-MB}" stroke="var(--brand)" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>`;
+  g+=`<circle cx="${x(P)}" cy="${y(Math.min(YMAX,fl.cp))}" r="6" fill="var(--brand)" stroke="var(--panel)" stroke-width="2"/>`;
+  svg.innerHTML=g;
+}
+// ---------- Ábaco circular (regla de cálculo giratoria) ----------
+// Disco giratorio = dato de entrada (pendiente o caudal), anillo fijo exterior = resultado (caudal o pérdida de carga).
+// Las marcas de cada DN van sobre el disco: al girarlo apuntan al resultado en el anillo fijo.
+// Gravedad: Q ∝ √J  → la escala de pendientes del disco tiene la mitad de paso por década que la de caudales.
+// Presión:  J ∝ Q^1,9 → la escala de caudales del disco tiene 1,9 veces el paso por década de la de pérdidas.
+// Todas las posiciones se recalculan con el motor exacto del ábaco (Colebrook / Manning / Hazen-Williams).
+const DIAL=(()=>{
+  const C=320, R_PLATE=314, R_RING_IN=266, R_RING_OUT=310, R_DISC=262, R_IN_OUT=186, R_IN_IN=150, R_HUB=136;
+  const CFG={
+    grav:{ ring:{min:0.1,max:10000,a0:-150,deg:60,unit:"l/s",title:"CAUDAL  l/s"},
+           disc:{deg:30,unit:"‰",title:"PENDIENTE ‰",ticks:[0.5,0.6,0.7,0.8,0.9,1,1.25,1.5,2,2.5,3,4,5,6,7,8,9,10,12.5,15,20,25,30,40,50,60,70,80,90,100],labels:[0.5,1,2,5,10,20,50,100]},
+           input:"pend" },
+    pres:{ ring:{min:0.01,max:1000,a0:-101,deg:40.5,unit:"m/km",title:"PÉRDIDA DE CARGA  m/km"},
+           disc:{deg:77,unit:"l/s",title:"CAUDAL l/s",ticks:[0.3,0.4,0.5,0.6,0.8,1,1.5,2,3,4,5,6,8,10,15,20,25,30,40,50,60,80,100,150,200,250,300,400,500,600,800,1000,1500,2000,2500,3000],labels:[0.3,0.5,1,2,3,5,10,20,30,50,100,200,300,500,1000,2000,3000]},
+           input:"pq" }
+  };
+  const BIG=()=>window.matchMedia&&matchMedia("(max-width:600px)").matches;
+  let lastBig=null, svg=null, mode=null, phi=0, drag=null, marks=[], last=null;
+  const rad=a=>(a-90)*Math.PI/180;
+  const pt=(r,a)=>[C+r*Math.cos(rad(a)),C+r*Math.sin(rad(a))];
+  const ringAng=(cf,v)=>cf.a0+(Math.log10(v)-Math.log10(cf.min))*cf.deg;
+  const nf=(v,d)=>v.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
+  const lab=v=>v>=1000?nf(v/1000,v%1000?1:0)+"k":nf(v,v<1?(String(v).split(".")[1]||"").length:v%1?1:0);
+  const upright=(a,off=0)=>{ const n=(((a+off)%360)+360)%360; return n>90&&n<270?a+180:a; };
+  // rótulos siempre horizontales para leerse en cualquier posición (los del disco se contragiran)
+  function text(x,y,a,s,cls,anchor="middle",off=0){ return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}"${off?` transform="rotate(${(-off).toFixed(2)} ${x.toFixed(1)} ${y.toFixed(1)})"`:""} text-anchor="${anchor}" dominant-baseline="central" class="${cls}">${s}</text>`; }
+  function line(r1,r2,a,cls){ const [x1,y1]=pt(r1,a),[x2,y2]=pt(r2,a); return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" class="${cls}"/>`; }
+  function arc(r,a1,a2){ const [x1,y1]=pt(r,a1),[x2,y2]=pt(r,a2); const big=Math.abs(a2-a1)>180?1:0; return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 ${big} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`; }
+  function sector(r1,r2,a1,a2){ const p1=pt(r2,a1),p2=pt(r2,a2),p3=pt(r1,a2),p4=pt(r1,a1),big=Math.abs(a2-a1)>180?1:0, f=v=>v.toFixed(1);
+    return `M${f(p1[0])} ${f(p1[1])} A${r2} ${r2} 0 ${big} 1 ${f(p2[0])} ${f(p2[1])} L${f(p3[0])} ${f(p3[1])} A${r1} ${r1} 0 ${big} 0 ${f(p4[0])} ${f(p4[1])} Z`; }
+  function arcCCW(r,a1,a2){ const [x1,y1]=pt(r,a1),[x2,y2]=pt(r,a2); return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 0 ${x2.toFixed(1)} ${y2.toFixed(1)}`; }
+  function ring(cf){ // anillo fijo exterior con escala logarítmica
+    const a1=ringAng(cf,cf.min), a2=ringAng(cf,cf.max); let g=`<path d="${arc((R_RING_IN+R_RING_OUT)/2,a1-3,a2+3)}" class="dl-ringband" stroke-width="${R_RING_OUT-R_RING_IN}"/>`;
+    for(let d=Math.floor(Math.log10(cf.min));d<Math.ceil(Math.log10(cf.max));d++) for(let m=1;m<10;m++){ const v=m*10**d; if(v<cf.min-1e-12||v>cf.max+1e-9) continue; const a=ringAng(cf,v), maj=m===1, mid=m===2||m===5;
+      g+=line(R_RING_IN,R_RING_IN+(maj?16:mid?11:7),a,maj?"dl-rt maj":"dl-rt");
+      if(maj||mid) g+=text(...pt(R_RING_IN+(maj?(BIG()?(Math.abs(Math.sin(a*Math.PI/180))>0.85?17:25):27):22),a),a,lab(v),maj?"dl-rl maj":"dl-rl"); }
+    g+=line(R_RING_IN,R_RING_IN+16,a2,"dl-rt maj")+text(...pt(R_RING_IN+(BIG()?(Math.abs(Math.sin(a2*Math.PI/180))>0.85?17:25):27),a2),a2,lab(cf.max),"dl-rl maj");
+    g+=`<path id="dl-ttl" d="${arcCCW(R_RING_IN+18,a1-6+360,a2+6)}" fill="none"/>`;
+    return g; }
+  function discScale(cf,off){ // escala de entrada impresa en el disco (gira con él)
+    let g=`<circle cx="${C}" cy="${C}" r="${(R_IN_OUT+R_IN_IN)/2}" class="dl-inband" stroke-width="${R_IN_OUT-R_IN_IN}"/>`;
+    cf.ticks.forEach(v=>{ const a=-cf.deg*Math.log10(v), maj=cf.labels.includes(v); g+=line(R_IN_OUT,R_IN_OUT-(maj?13:7),a,maj?"dl-it maj":"dl-it"); if(maj) g+=text(...pt(R_IN_OUT-(BIG()?27:24),a),a,lab(v),"dl-il","middle",off); });
+    for(let i=0;i<72;i++){ const a=i*5; g+=`<circle cx="${pt(R_DISC-5,a)[0].toFixed(1)}" cy="${pt(R_DISC-5,a)[1].toFixed(1)}" r="1.6" class="dl-knurl"/>`; }
+    return g; }
+  function build(m){
+    mode=m; const cf=CFG[m];
+    svg.innerHTML=`<defs><radialGradient id="dl-sh" cx="50%" cy="45%" r="55%"><stop offset="80%" stop-color="var(--dl-disc)"/><stop offset="100%" stop-color="var(--dl-disc2)"/></radialGradient></defs>
+      <circle cx="${C}" cy="${C}" r="${R_PLATE}" class="dl-plate"/>
+      <g id="dl-ring">${ring(cf.ring)}</g>
+      <text class="dl-rtitle"><textPath href="#dl-ttl" startOffset="50%" text-anchor="middle">${cf.ring.title}</textPath></text>
+      <g id="dl-qd"></g>
+      <g id="dl-disc" tabindex="-1"><circle cx="${C}" cy="${C}" r="${R_DISC}" fill="url(#dl-sh)" class="dl-disc"/><g id="dl-dscale"></g><g id="dl-marks"></g></g>
+      <g id="dl-fixed" pointer-events="none">
+        <path d="${sector(R_IN_IN-5,R_IN_OUT+5,-16,16)}" class="dl-window"/>
+        <polygon points="${pt(R_IN_OUT+14,0).join(",")} ${pt(R_IN_OUT+4,-3.2).join(",")} ${pt(R_IN_OUT+4,3.2).join(",")}" class="dl-index"/>
+        <line id="dl-hair" x1="${C}" y1="${C-R_HUB}" x2="${C}" y2="${C-R_RING_OUT}" class="dl-hair"/>
+        <g id="dl-hairlab"></g>
+      </g>
+      <g id="dl-hub"></g>`;
+  }
+  // Coloca los rótulos de DN sin solaparse: primero el elegido, después el resto; cada uno en el primer nivel radial libre.
+  // Si no cabe en ningún nivel (o caería sobre la ventana del disco) se deja solo la marca y el punto.
+  function stagger(list){ const big=BIG(), fs=big?19:11, step=big?21:14, base=big?50:45, levels=big?2:3, placed=[];
+    const win={x1:C-58,x2:C+58,y1:C-R_IN_OUT-8,y2:C-R_IN_IN+4};
+    const box=(m,l)=>{ let [x,y]=pt(R_DISC-base+6-l*step,m.ang); const sn=Math.sin(m.ang*Math.PI/180), hw=m.lab.length*fs*0.62*(m.sel?1.12:1)/2; if(sn>0.35) x-=hw; else if(sn<-0.35) x+=hw; const w=m.lab.length*fs*0.62*(m.sel?1.12:1)/2+2, h=fs*(m.sel?1.12:1)/2+1; return {x1:x-w,x2:x+w,y1:y-h,y2:y+h}; };
+    const hit=(a,b)=>a.x1<b.x2&&a.x2>b.x1&&a.y1<b.y2&&a.y2>b.y1;
+    const order=[...list].sort((a,b)=>(b.sel-a.sel)||(a.ang-b.ang));
+    order.forEach(m=>{ m.hide=true; for(let l=0;l<levels;l++){ const bx=box(m,l); if(placed.some(p=>hit(p,bx))) continue; if(!m.sel&&hit(bx,win)) continue; m.lvl=l; m.hide=false; placed.push(bx); break; } if(m.hide) m.lvl=0; }); }
+  function drawMarks(list,cf){
+    stagger(list); let g="";
+    list.forEach(m=>{ const a=m.ang-phi; const r0=R_DISC, cls=`dl-mk st-${m.st}${m.sel?" sel":""}`;
+      g+=`<g class="${cls}" data-dn="${m.n}" role="button" aria-label="DN ${m.n}">`+line(R_DISC-26,r0+4,a,"dl-mt")+`<circle cx="${pt(R_DISC-31,a)[0].toFixed(1)}" cy="${pt(R_DISC-31,a)[1].toFixed(1)}" r="${m.sel?5:3.6}" class="dl-md"/>`+(m.hide?"":text(...pt(R_DISC-(BIG()?44:39)-m.lvl*(BIG()?21:14),a),a,m.lab,"dl-ml",Math.sin(m.ang*Math.PI/180)>0.35?"end":Math.sin(m.ang*Math.PI/180)<-0.35?"start":"middle",phi))+
+        `<path d="${sector(R_DISC-72,R_DISC+2,a-3.5,a+3.5)}" class="dl-hit"/></g>`; });
+    svg.querySelector("#dl-marks").innerHTML=g;
+    // segunda pasada con medidas reales (en unidades del SVG, sin depender de la animación del giro):
+    // el rótulo que aún pise a otro ya colocado, o a la ventana, se quita; la marca y el punto se quedan
+    const wr={left:C-60,right:C+60,top:C-R_IN_OUT-9,bottom:C-R_IN_IN+5}, keep=[], cph=Math.cos(phi*Math.PI/180), sph=Math.sin(phi*Math.PI/180);
+    const els=[...svg.querySelectorAll("#dl-marks .dl-mk")].map(g=>({t:g.querySelector(".dl-ml"),sel:g.classList.contains("sel")})).filter(x=>x.t).sort((a,b)=>b.sel-a.sel);
+    const ov=(a,b)=>a.left<b.right-0.5&&a.right>b.left+0.5&&a.top<b.bottom-0.5&&a.bottom>b.top+0.5;
+    const absBox=t=>{ let bb; try{ bb=t.getBBox(); }catch(_){ return null; } if(!bb.width) return null; const x0=+t.getAttribute("x"), y0=+t.getAttribute("y"), dx=x0-C, dy=y0-C, X=C+dx*cph-dy*sph, Y=C+dx*sph+dy*cph; return {left:X+bb.x-x0,right:X+bb.x-x0+bb.width,top:Y+bb.y-y0,bottom:Y+bb.y-y0+bb.height}; };
+    svg.querySelectorAll("#dl-dscale .dl-il").forEach(t=>{ const r=absBox(t); if(r) keep.push(r); });
+    els.forEach(x=>{ let bb; try{ bb=x.t.getBBox(); }catch(_){ return; } if(!bb.width) return; const x0=+x.t.getAttribute("x"), y0=+x.t.getAttribute("y"), dx=x0-C, dy=y0-C, X=C+dx*cph-dy*sph, Y=C+dx*sph+dy*cph;
+      const r={left:X+bb.x-x0,right:X+bb.x-x0+bb.width,top:Y+bb.y-y0,bottom:Y+bb.y-y0+bb.height};
+      if(!x.sel&&(keep.some(k=>ov(k,r))||ov(wr,r))){ x.t.remove(); return; } keep.push(r); });
+  }
+  function setRot(){ svg.querySelector("#dl-disc").setAttribute("transform",`rotate(${phi.toFixed(3)} ${C} ${C})`); svg.querySelector("#dl-dscale").innerHTML=discScale(CFG[mode].disc,phi); }
+  function hub(h){ svg.querySelector("#dl-hub").innerHTML=`<circle cx="${C}" cy="${C}" r="${R_HUB}" class="dl-hubc"/><text x="${C}" y="${C-(BIG()?114:118)}" text-anchor="middle" class="dl-wtitle">▲ ${CFG[mode].disc.title}</text>`+h; }
+  function hair(ang){ const hl=svg.querySelector("#dl-hair"); if(ang==null){ hl.style.display="none"; svg.querySelector("#dl-hairlab").innerHTML=""; return; } hl.style.display="";
+    hl.setAttribute("transform",`rotate(${ang.toFixed(2)} ${C} ${C})`); }
+  function section(f,dy=58){ // corte del tubo con el calado
+    const r=BIG()?22:26, cx=C, cy=C+dy, h=2*r*f, yw=cy+r-h; const th=Math.acos(Math.max(-1,Math.min(1,(cy-yw)/r))); const xw=r*Math.sin(th);
+    const water=f>=0.999?`<circle cx="${cx}" cy="${cy}" r="${r}" class="dl-water"/>`:`<path d="M${(cx-xw).toFixed(1)} ${yw.toFixed(1)} A${r} ${r} 0 ${f>0.5?1:0} 0 ${(cx+xw).toFixed(1)} ${yw.toFixed(1)} Z" class="dl-water"/>`;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" class="dl-pipe"/>${water}<circle cx="${cx}" cy="${cy}" r="${r}" class="dl-pipeo"/>`; }
+  // --- dibujo por modo ---
+  function drawGrav(row,sel,p,f,J,state){
+    if(mode!=="grav"||lastBig!==BIG()) { lastBig=BIG(); build("grav"); } const cf=CFG.grav; phi=cf.disc.deg*Math.log10(J*1000); setRot();
+    marks=row.dn.map(([n,di])=>{ const r=calc(di,f,J,p); return {n,di,r,lab:String(n)+(r.Q<cf.ring.min?" ‹":r.Q>cf.ring.max?" ›":""),ang:ringAng(cf.ring,Math.max(cf.ring.min,Math.min(cf.ring.max,r.Q))),st:stateOf(p,n,di,r,f),sel:n===sel}; });
+    drawMarks(marks,cf);
+    const qd=parseFloat($("qdis").value); const qg=svg.querySelector("#dl-qd");
+    qg.innerHTML=qd>0&&qd>=cf.ring.min&&qd<=cf.ring.max?(()=>{ const a=ringAng(cf.ring,qd); return `<polygon points="${pt(R_RING_IN-1,a).join(",")} ${pt(R_RING_IN-13,a-2.6).join(",")} ${pt(R_RING_IN-13,a+2.6).join(",")}" class="dl-qdm"/>`+line(R_RING_IN,R_RING_OUT,a,"dl-qdl")+text(...pt(R_RING_OUT+0.5-6,a+4.2),a+4.2,"Q dis.","dl-qdt"); })():"";
+    const m=marks.find(x=>x.sel); last={mode:"grav",m};
+    hair(m?m.ang:null);
+    const full=m?calc(m.di,1,J,p):null;
+    const b=BIG(), Y=b?{a:-86,b:-44,c:-6,d:26,e:64,f:108}:{a:-96,b:-62,c:-34,d:-12,e:58,f:102};
+    hub(m?`<text x="${C}" y="${C+Y.a}" text-anchor="middle" class="dl-h0">DN ${m.n} · ${row.s}</text>
+      <text x="${C}" y="${C+Y.b}" text-anchor="middle" class="dl-h1">${nf(m.r.Q,m.r.Q<10?2:1)}<tspan class="dl-hu"> l/s</tspan></text>
+      <text x="${C}" y="${C+Y.c}" text-anchor="middle" class="dl-h2">${nf(m.r.v,2)} m/s · ${fmtJ(J)} ‰</text>
+      <text x="${C}" y="${C+Y.d}" text-anchor="middle" class="dl-h3 st-${m.st}">${{ok:"Dentro de criterio",warn:"Sin autolimpieza",crit:"Velocidad excesiva",fill:"Calado excesivo",dn:"DN < mínimo"}[m.st]}</text>
+      ${section(f,Y.e)}<text x="${C}" y="${C+Y.f}" text-anchor="middle" class="dl-h2">h/D ${Math.round(f*100)} %${b?"":` · llena ${nf(full.Q,full.Q<10?2:0)} l/s`}</text>`:"");
+    numSync(J*1000,"Pendiente (‰)");
+    $("hprint").textContent=`${prod().name} ${row.s} · DN ${sel} · Criterio: ${p.label} (${{res:"residuales",plu:"pluviales",uni:"unitaria"}[$("red").value]}) · ${p.formula==="manning"?"Manning n = "+nf(p.n,3):"Colebrook k = "+nf(p.k,3)+" mm"} · pendiente ${fmtJ(J)} ‰ · calado ${Math.round(f*100)} %${parseFloat($("qdis").value)>0?" · Q de diseño "+$("qdis").value+" l/s":""} · ${new Date().toLocaleDateString("es-ES")}`;
+    $("dialcap").textContent=`Gira el disco para fijar la pendiente en la ventana. Cada marca es un DN de ${prod().name} ${row.s}: apunta a su caudal en el anillo exterior con calado ${Math.round(f*100)} %.${qd>0&&(qd<cf.ring.min||qd>cf.ring.max)?` El caudal de diseño (${nf(qd,0)} l/s) queda fuera del anillo.`:""}${marks.some(x=>x.r.Q<cf.ring.min)?" Las marcas con ‹ están por debajo de 0,1 l/s.":""}`;
+    if(m) live(`DN ${m.n}: ${nf(m.r.Q,1)} l/s, ${nf(m.r.v,2)} m/s con ${fmtJ(J)} ‰`);
+  }
+  function drawPres(row,sel,p,Q,L){
+    if(mode!=="pres"||lastBig!==BIG()) { lastBig=BIG(); build("pres"); } const cf=CFG.pres; phi=cf.disc.deg*Math.log10(Q); setRot();
+    const out=[]; marks=[];
+    row.dn.forEach(([n,di])=>{ const r=pcalc(di,Q,p), j=r.J*1000; const st=r.v<p.vmin?"warn":r.v>p.vmax?"crit":"ok"; if(j<cf.ring.min||j>cf.ring.max){ out.push(n); return; } marks.push({n,di,r,lab:String(n),ang:ringAng(cf.ring,j),st,sel:n===sel}); });
+    drawMarks(marks,cf); svg.querySelector("#dl-qd").innerHTML="";
+    const m=marks.find(x=>x.sel); last={mode:"pres",m};
+    hair(m?m.ang:null);
+    const [sn,sdi]=row.dn.find(d=>d[0]===sel), rs=pcalc(sdi,Q,p), sst=rs.v<p.vmin?"warn":rs.v>p.vmax?"crit":"ok";
+    const b=BIG(), Y=b?{a:-86,b:-44,c:-6,d:24,e:54,f:88}:{a:-96,b:-62,c:-34,d:-12,e:30,f:58};
+    hub(`<text x="${C}" y="${C+Y.a}" text-anchor="middle" class="dl-h0">DN ${sn} · ${row.s}</text>
+      <text x="${C}" y="${C+Y.b}" text-anchor="middle" class="dl-h1">${nf(rs.J*1000,rs.J*1000<10?2:1)}<tspan class="dl-hu"> m/km</tspan></text>
+      <text x="${C}" y="${C+Y.c}" text-anchor="middle" class="dl-h2">${nf(Q,Q<10?2:1)} l/s · ${nf(rs.v,2)} m/s</text>
+      <text x="${C}" y="${C+Y.d}" text-anchor="middle" class="dl-h3 st-${sst}">${{ok:"Velocidad dentro de límites",warn:"Velocidad baja",crit:"Velocidad alta"}[sst]}</text>
+      <text x="${C}" y="${C+Y.e}" text-anchor="middle" class="dl-h2">ΔH en ${nf(L,0)} m</text>
+      <text x="${C}" y="${C+Y.f}" text-anchor="middle" class="dl-h1s">${nf(rs.J*L,2)} m · ${nf(rs.J*L/10.2,2)} bar</text>
+      ${m?"":`<text x="${C}" y="${C+(b?114:92)}" text-anchor="middle" class="dl-h3 st-crit">DN ${sn} fuera de la escala</text>`}`);
+    numSync(Q,"Caudal (l/s)");
+    $("hprint").textContent=`${prod().name} ${row.s} · DN ${sel} · ${p.formula==="hw"?"Hazen-Williams C = "+nf(p.C,0):"Colebrook-White k = "+nf(p.k,3)+" mm"} · caudal ${nf(Q,Q<10?2:1)} l/s · tramo ${nf(L,0)} m · agua a ${p.nu===1.31e-6?"10":"20"} °C · v ${nf(p.vmin,1)}–${nf(p.vmax,1)} m/s · ${new Date().toLocaleDateString("es-ES")}`;
+    $("dialcap").textContent=`Gira el disco para fijar el caudal en la ventana. Cada marca es un DN de ${prod().name} ${row.s}: apunta a su pérdida de carga en el anillo exterior. Color: velocidad dentro o fuera de ${nf(p.vmin,1)}–${nf(p.vmax,1)} m/s.${out.length?` Fuera de la escala de 0,01–1.000 m/km (no se dibujan): DN ${out.join(", ")}.`:""}`;
+    live(`DN ${sn}: ${nf(rs.J*1000,2)} m/km, ${nf(rs.v,2)} m/s con ${nf(Q,Q<10?2:1)} l/s`);
+  }
+  function clear(msg){ if(!svg||!mode) return; svg.querySelector("#dl-marks").innerHTML=""; hair(null); hub(`<text x="${C}" y="${C}" text-anchor="middle" class="dl-h3 st-crit">${msg}</text>`); }
+  function numSync(v,lab,force){ const el=$("dialval"); $("dialvallab").textContent=lab; if(force||document.activeElement!==el){ const d=mode==="grav"?(v<2?2:1):(v<10?2:v<100?1:0); el.value=nf(v,d); el.classList.remove("bad"); $("dialmsg").textContent=""; } }
+  const nice=(v,up)=>{ const st=mode==="grav"?(v<1?0.05:v<5?0.1:v<20?0.5:v<50?1:5):(v<1?0.1:v<10?0.5:v<100?1:v<1000?10:50); let n=up?v+st:v-st; n=Math.round(n/st)*st; return n>0?n:v; };
+  function setValue(v){ const cf=CFG[mode], el=$(cf.input); const lo=parseFloat(el.min), hi=parseFloat(el.max), vmin=10**lo, vmax=10**hi, u=cf.disc.unit;
+    if(!(v>0)||v<vmin*0.9995||v>vmax*1.0005){ const f=$("dialval"); f.classList.add("bad"); $("dialmsg").textContent=isFinite(v)?`Fuera de rango: entre ${nf(vmin,vmin<1?2:1)} y ${nf(vmax,0)} ${u}`:"Escribe un número (usa coma o punto para los decimales)"; return false; }
+    el.value=Math.max(lo,Math.min(hi,Math.log10(v))); el.dispatchEvent(new Event("input",{bubbles:true})); return true; }
+  const parseNum=t=>{ t=String(t).trim().replace(/\s/g,""); if(!/^\d+([.,]\d+)?$/.test(t)) return NaN; return parseFloat(t.replace(",",".")); };
+  function cur(){ const cf=CFG[mode]; return 10**parseFloat($(cf.input).value); }
+  function bindNum(){ const f=$("dialval");
+    f.addEventListener("change",()=>{ if(setValue(parseNum(f.value))) numSync(cur(),$("dialvallab").textContent,true); });
+    f.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); f.dispatchEvent(new Event("change")); } });
+    $("dialminus").addEventListener("click",()=>{ setValue(Math.max(nice(cur(),false),10**parseFloat($(CFG[mode].input).min))); numSync(cur(),$("dialvallab").textContent,true); });
+    $("dialplus").addEventListener("click",()=>{ setValue(Math.min(nice(cur(),true),10**parseFloat($(CFG[mode].input).max))); numSync(cur(),$("dialvallab").textContent,true); }); }
+  let liveT=null; function live(t){ clearTimeout(liveT); liveT=setTimeout(()=>{ const el=$("dialsr"); if(el) el.textContent=t; },400); }
+  // --- interacción ---
+  const angOf=e=>{ const b=svg.getBoundingClientRect(); const x=(e.clientX-b.left)*640/b.width-C, y=(e.clientY-b.top)*640/b.height-C; return {a:Math.atan2(x,-y)*180/Math.PI, r:Math.hypot(x,y)}; };
+  let rafPending=false;
+  function setInput(newPhi){ const cf=CFG[mode], el=$(cf.input); const lo=parseFloat(el.min), hi=parseFloat(el.max); let v=newPhi/cf.disc.deg; v=Math.max(lo,Math.min(hi,v)); el.value=v.toFixed(3);
+    if(rafPending) return; rafPending=true; (window.requestAnimationFrame||setTimeout)(()=>{ rafPending=false; el.dispatchEvent(new Event("input",{bubbles:true})); }); }
+  function pick(n){ const el=$("dn"); if([...el.options].some(o=>o.value===n)){ el.value=n; el.dispatchEvent(new Event("input",{bubbles:true})); } }
+  function init(el){ svg=el; bindNum();
+    // en táctil, el disco captura el gesto (el anillo y el centro siguen dejando desplazar la página)
+    svg.addEventListener("touchstart",e=>{ if(!mode) return; const {r}=angOf(e.touches[0]); if(r<=R_DISC+6&&r>=R_HUB) e.preventDefault(); },{passive:false});
+    svg.addEventListener("pointerdown",e=>{ if(!mode) return; const {a,r}=angOf(e); if(r>R_DISC+6||r<R_HUB) return; e.preventDefault(); try{ svg.focus({preventScroll:true}); }catch(_){ svg.focus(); } svg.setPointerCapture(e.pointerId); drag={aPrev:a,acc:0,phi0:phi,moved:0,target:e.target.closest(".dl-mk")}; svg.classList.add("grab"); });
+    // el giro se acumula entre movimientos (admite más de media vuelta) y se limita al rango de la escala
+    svg.addEventListener("pointermove",e=>{ if(!drag) return; const {a}=angOf(e); let d=a-drag.aPrev; if(d>180) d-=360; if(d<-180) d+=360; drag.aPrev=a;
+      const cf=CFG[mode], el=$(cf.input), lo=parseFloat(el.min)*cf.disc.deg-drag.phi0, hi=parseFloat(el.max)*cf.disc.deg-drag.phi0;
+      drag.acc=Math.max(lo,Math.min(hi,drag.acc+d)); drag.moved=Math.max(drag.moved,Math.abs(drag.acc)); if(drag.moved>1.5) setInput(drag.phi0+drag.acc); });
+    const end=()=>{ if(drag&&drag.moved<=1.5&&drag.target) pick(drag.target.dataset.dn); drag=null; svg.classList.remove("grab"); };
+    svg.addEventListener("pointerup",end); svg.addEventListener("pointercancel",()=>{ drag=null; svg.classList.remove("grab"); });
+    svg.addEventListener("keydown",e=>{ if(!mode) return; const cf=CFG[mode], el=$(cf.input); const st=e.shiftKey?0.1:0.01;
+      if(e.key==="ArrowRight"||e.key==="ArrowLeft"){ e.preventDefault(); setInput((parseFloat(el.value)+(e.key==="ArrowRight"?st:-st))*cf.disc.deg); }
+      if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); const o=[...$("dn").options].map(x=>x.value), i=o.indexOf($("dn").value), j=Math.max(0,Math.min(o.length-1,i+(e.key==="ArrowUp"?1:-1))); pick(o[j]); } });
+  }
+  return {init,drawGrav,drawPres,clear,CFG,ringAng,get marks(){return marks;},get phi(){return phi;}};
+})();
+DIAL.init($("dial"));
+if(window.matchMedia){ const mq=matchMedia("(max-width:600px)"); (mq.addEventListener?mq.addEventListener("change",()=>render()):mq.addListener(()=>render())); }
+
+$("curvesbtn").addEventListener("click",()=>{ const on=document.documentElement.getAttribute("data-curves")!=="1"; document.documentElement.setAttribute("data-curves",on?"1":"0"); $("curvesbtn").setAttribute("aria-pressed",on); $("curvesbtn").textContent=on?"Ocultar curvas":"Ver también como curvas"; render(); });
+$("dialprint").addEventListener("click",()=>window.print());
+function render(){ ERR.length=0; document.querySelectorAll(".bad").forEach(e=>e.classList.remove("bad")); let out; try{ out=(MODE==="mec")?renderMec():(MODE==="pres")?renderPres():(MODE==="flow")?renderFlow():renderGrav(); } finally { showErrors(); if(ERR.length){ DIAL.clear("Corrige los datos marcados"); $("chart").innerHTML=""; $("charttitle").textContent="Sin resultado: corrige los datos"; $("results").innerHTML=`<div class="tile"><div class="k">Sin resultado</div><div class="v" style="font-family:Archivo;font-size:18px;color:var(--crit)">Corrige los datos marcados</div></div>`; $("table").innerHTML=""; } } return out; }
+function renderGrav(){
+  const p=params(); const J=Math.pow(10,parseFloat($("pend").value))/1000; const f=parseInt($("fill").value)/100;
+  $("pendout").textContent=fmtJ(J)+" ‰"; $("fillout").textContent=Math.round(f*100)+" %";
+  const row=serie(), sel=$("dn").value;
+  if(document.documentElement.getAttribute("data-curves")==="1") drawChart(row,sel,p,f,J); else { cache=null; $("chart").innerHTML=""; } drawResults(row,sel,p,f,J); drawTable(row,sel,p,f,J); DIAL.drawGrav(row,sel,p,f,J);
+  $("charttitle").textContent=`${prod().name} ${row.s} · calado ${Math.round(f*100)} % · ${p.formula==="manning"?"Manning n = "+fmt(p.n,3):"Colebrook k = "+fmt(p.k,3)+" mm"}`;
+  $("tabletitle").textContent=`Toda la gama ${prod().name} ${row.s} a ${fmtJ(J)} ‰ y calado ${Math.round(f*100)} %`;
+  $("foot").innerHTML=`<b>Método.</b> Sección circular parcialmente llena con radio hidráulico exacto. Prandtl-Colebrook con diámetro hidráulico 4·Rh y ν = 1,31·10⁻⁶ m²/s (10 °C); Manning con v = (1/n)·Rh^(2/3)·J^(1/2). Diámetros interiores de las fichas técnicas de Grupo GPF (pared compacta: De − 2e; corrugado: Di mínimo de ficha). <b>Criterio activo:</b> ${p.label}, ${{res:"residuales",plu:"pluviales",uni:"unitaria"}[$("red").value]}: v mín. ${fmt(p.vmin)} m/s, v máx. ${fmt(p.vmax)} m/s, ${p.fillmode.mode==="Q"?`Q máx. ${p.fillmode.pct} % del de sección llena (calado ≤ ${p.fillmax} %)`:`llenado máx. ${p.fillmax} %`}${p.dnmin?`, DN mín. ${p.dnmin} ${p.dnref==="ID"?"interior":""}`:""}. La velocidad se comprueba con el caudal que circula al calado fijado; algunos gestores la exigen con el caudal mínimo (CYII, EMACSA, Algeciras, BCASA): baja el calado para reproducirlo. Los valores "se toma" indican parámetros que la norma no fija y que la herramienta asume; compruébalos siempre con el documento del gestor.`;
+}
+
+const ramp=["--r1","--r2","--r3","--r4","--r5","--r6"];
+function rampColor(i,n){ const idx=n<=1?5:Math.round(i/(n-1)*5); return `var(${ramp[idx]})`; }
+const W=900,H=560,ML=64,MR=84,MT=26,MB=46, JMIN=0.5,JMAX=100; let cache=null;
+function drawChart(row,sel,p,f,J){
+  const svg=$("chart"); const N=60;
+  const curves=row.dn.map(([n,di],i)=>{ const c=[]; for(let s=0;s<=N;s++){ const jp=JMIN*Math.pow(JMAX/JMIN,s/N); const r=calc(di,f,jp/1000,p); c.push({jp,Q:r.Q,v:r.v}); } return {n,di,c,color:rampColor(i,row.dn.length),sel:n===sel}; });
+  let qmin=Infinity,qmax=0; curves.forEach(cv=>cv.c.forEach(pt=>{qmin=Math.min(qmin,pt.Q);qmax=Math.max(qmax,pt.Q);}));
+  const QMIN=Math.pow(10,Math.floor(Math.log10(qmin))), QMAX=Math.pow(10,Math.ceil(Math.log10(qmax)));
+  const x=jp=>ML+(Math.log10(jp)-Math.log10(JMIN))/(Math.log10(JMAX)-Math.log10(JMIN))*(W-ML-MR);
+  const y=q=>H-MB-(Math.log10(q)-Math.log10(QMIN))/(Math.log10(QMAX)-Math.log10(QMIN))*(H-MT-MB);
+  cache={curves,x,y};
+  let g="";
+  const decades=(a,b,fn)=>{ for(let d=Math.log10(a);d<Math.log10(b);d++){ for(let m=1;m<10;m++){ const v=m*Math.pow(10,d); if(v<a||v>b) continue; fn(v,m===1); } } fn(b,true); };
+  decades(JMIN,JMAX,(v,major)=>{ g+=`<line x1="${x(v)}" y1="${MT}" x2="${x(v)}" y2="${H-MB}" stroke="var(--grid)" stroke-width="${major?1.2:0.6}"/>`; if(major||[2,5,20,50].includes(v)) g+=`<text x="${x(v)}" y="${H-MB+18}" text-anchor="middle" font-size="12" font-family="JetBrains Mono" fill="var(--muted)">${fmt(v,v<1?1:0)}</text>`; });
+  decades(QMIN,QMAX,(v,major)=>{ g+=`<line x1="${ML}" y1="${y(v)}" x2="${W-MR}" y2="${y(v)}" stroke="var(--grid)" stroke-width="${major?1.2:0.6}"/>`; if(major||String(v)[0]==="2"||String(v)[0]==="5") g+=`<text x="${ML-8}" y="${y(v)+4}" text-anchor="end" font-size="12" font-family="JetBrains Mono" fill="var(--muted)">${fmt(v,0)}</text>`; });
+  g+=`<text x="${(ML+W-MR)/2}" y="${H-8}" text-anchor="middle" font-size="12" font-family="Archivo" font-weight="600" letter-spacing="1" fill="var(--muted)">PENDIENTE  ‰</text>`;
+  g+=`<text transform="translate(16 ${(MT+H-MB)/2}) rotate(-90)" text-anchor="middle" font-size="12" font-family="Archivo" font-weight="600" letter-spacing="1" fill="var(--muted)">CAUDAL  l/s</text>`;
+  g+=`<line x1="${x(J*1000)}" y1="${MT}" x2="${x(J*1000)}" y2="${H-MB}" stroke="var(--brand)" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>`;
+  [...curves.filter(c=>!c.sel),...curves.filter(c=>c.sel)].forEach(cv=>{
+    let seg="",state=null;
+    const flush=()=>{ if(seg){ const dash=state==="low"?' stroke-dasharray="6 5"':state==="high"?' stroke-dasharray="1.5 4"':''; const col=cv.sel?"var(--brand)":(state==="low"?"var(--warn)":state==="high"?"var(--crit)":cv.color); g+=`<path d="${seg}" fill="none" stroke="${col}" stroke-width="${cv.sel?3:1.8}" stroke-linecap="round"${dash}${cv.sel?'':' opacity=".9"'}/>`; } seg=""; };
+    cv.c.forEach((pt,i)=>{ const st=pt.v<p.vmin?"low":pt.v>p.vmax?"high":"ok"; if(st!==state){ const prev=cv.c[i-1]; flush(); state=st; seg=prev?`M${x(prev.jp)} ${y(prev.Q)} `:`M${x(pt.jp)} ${y(pt.Q)} `; } seg+=`L${x(pt.jp)} ${y(pt.Q)} `; });
+    flush();
+    const last=cv.c[cv.c.length-1];
+    g+=`<text x="${W-MR+6}" y="${y(last.Q)+4}" font-size="${cv.sel?12.5:11}" font-family="JetBrains Mono" font-weight="${cv.sel?600:400}" fill="${cv.sel?'var(--brand)':'var(--muted)'}">${cv.n}</text>`;
+    const r=calc(cv.di,f,J,p);
+    g+=`<circle cx="${x(J*1000)}" cy="${y(r.Q)}" r="${cv.sel?5.5:3.5}" fill="${cv.sel?'var(--brand)':cv.color}" stroke="var(--panel)" stroke-width="2"/>`;
+  });
+  svg.innerHTML=g;
+}
+(function(){ const svg=$("chart"),tip=$("tip");
+  svg.addEventListener("mousemove",e=>{ if(!cache){tip.style.display="none";return;} const r=svg.getBoundingClientRect(); const px=(e.clientX-r.left)*W/r.width, py=(e.clientY-r.top)*H/r.height; if(px<ML||px>W-MR||py<MT||py>H-MB){tip.style.display="none";return;}
+    if(cache.pres){ const q=Math.pow(10,Math.log10(PQMIN)+(px-ML)/(W-ML-MR)*(Math.log10(PQMAX)-Math.log10(PQMIN))); const p=pparams();
+      let best=null; cache.curves.forEach(cv=>{ const rr=pcalc(cv.di,q,p); const jj=rr.J*1000; if(jj<0.1||jj>1000) return; const d=Math.abs(cache.y(jj)-py); if(!best||d<best.d) best={d,cv,rr}; });
+      if(!best||best.d>40){tip.style.display="none";return;}
+      tip.style.display="block"; tip.style.left=(e.clientX-r.left)+"px"; tip.style.top=(e.clientY-r.top)+"px";
+      tip.textContent=`DN ${best.cv.n} · ${fmt(q,q<10?2:1)} l/s → ${fmt(best.rr.J*1000,2)} m/km · ${fmt(best.rr.v,2)} m/s`; return; }
+    const jp=Math.pow(10,Math.log10(JMIN)+(px-ML)/(W-ML-MR)*(Math.log10(JMAX)-Math.log10(JMIN))); const p=params(), f=parseInt($("fill").value)/100;
+    let best=null; cache.curves.forEach(cv=>{ const rr=calc(cv.di,f,jp/1000,p); const d=Math.abs(cache.y(rr.Q)-py); if(!best||d<best.d) best={d,cv,rr}; });
+    if(best.d>40){tip.style.display="none";return;}
+    tip.style.display="block"; tip.style.left=(e.clientX-r.left)+"px"; tip.style.top=(e.clientY-r.top)+"px";
+    tip.textContent=`DN ${best.cv.n} · ${fmtJ(jp/1000)} ‰ → ${fmt(best.rr.Q,best.rr.Q<10?2:1)} l/s · ${fmt(best.rr.v,2)} m/s`; });
+  svg.addEventListener("mouseleave",()=>tip.style.display="none");
+})();
+
+const STATE_TXT={ok:"OK",warn:"v baja",crit:"v alta",fill:"calado",dn:"DN < mín."};
+const STATE_CLS={ok:"ok",warn:"warn",crit:"crit",fill:"warn",dn:"crit"};
+function chip(st,p){ const t={dn:`DN inferior al mínimo del gestor (${p.dnmin} ${p.dnref==="ID"?"interior":"DN"})`,fill:p.fillmode.mode==="Q"?`Supera el ${p.fillmode.pct} % del caudal a sección llena (calado > ${p.fillmax} %)`:`Calado sobre el máximo (${p.fillmax} %)`,warn:`Sin autolimpieza (v &lt; ${fmt(p.vmin)} m/s)`,crit:`Supera v máx. ${fmt(p.vmax)} m/s`,ok:"Dentro de criterio"}[st]; return `<span class="chip ${STATE_CLS[st]}">${t}</span>`; }
+function minSlope(di,f,p){ let lo=0.01,hi=200; for(let i=0;i<40;i++){ const m=Math.sqrt(lo*hi); if(calc(di,f,m/1000,p).v<p.vmin) lo=m; else hi=m; } return hi; }
+function drawResults(row,sel,p,f,J){
+  const [n,di]=row.dn.find(d=>d[0]===sel); const r=calc(di,f,J,p), full=calc(di,1,J,p);
+  $("results").innerHTML=`
+  <div class="tile"><div class="k">Tubo</div><div class="v" style="font-family:Archivo;font-size:20px">DN ${n} ${row.s}</div><div class="s">${prod().name} · Di ${fmt(di)} mm</div></div>
+  <div class="tile"><div class="k">Caudal a ${Math.round(f*100)} %</div><div class="v">${fmt(r.Q,r.Q<10?2:1)}<span class="u">l/s</span></div><div class="s">${fmt(r.Q/full.Q*100,0)} % del caudal a sección llena</div></div>
+  <div class="tile"><div class="k">Velocidad</div><div class="v">${fmt(r.v,2)}<span class="u">m/s</span></div>${chip(stateOf(p,n,di,r,f),p)}</div>
+  <div class="tile"><div class="k">Sección llena</div><div class="v">${fmt(full.Q,full.Q<10?2:1)}<span class="u">l/s</span></div><div class="s">v llena ${fmt(full.v,2)} m/s · Rh ${fmt(r.Rh*1000,0)} mm</div></div>
+  <div class="tile"><div class="k">Pendiente mínima</div><div class="v">${fmt(minSlope(di,f,p),2)}<span class="u">‰</span></div><div class="s">para v ≥ ${fmt(p.vmin)} m/s a este calado</div></div>`;
+}
+function drawTable(row,sel,p,f,J){
+  const qd=parseFloat($("qdis").value); let found=false;
+  let h=`<tr><th>Tubo</th><th>Di (mm)</th><th>Q ${Math.round(f*100)} % (l/s)</th><th>v (m/s)</th><th>Q llena (l/s)</th><th>v llena (m/s)</th><th>J mín. v≥${fmt(p.vmin)} (‰)</th><th>Estado</th></tr>`;
+  row.dn.forEach(([n,di],i)=>{ const r=calc(di,f,J,p), fu=calc(di,1,J,p); const st=stateOf(p,n,di,r,f); const txt=STATE_TXT[st];
+    let mark=""; if(qd>0&&!found&&r.Q>=qd&&st==="ok"){found=true;mark=` ← lleva ${fmt(qd,0)} l/s`;}
+    h+=`<tr class="${n===sel?"sel":""}"><td><span class="dot" style="background:${n===sel?'var(--brand)':rampColor(i,row.dn.length)}"></span>DN ${n}${mark}</td><td>${fmt(di)}</td><td>${fmt(r.Q,r.Q<10?2:1)}</td><td>${fmt(r.v,2)}</td><td>${fmt(fu.Q,fu.Q<10?2:1)}</td><td>${fmt(fu.v,2)}</td><td>${fmt(minSlope(di,f,p),2)}</td><td><span class="chip ${STATE_CLS[st]}" style="margin:0">${txt}</span></td></tr>`; });
+  if(qd>0&&!found) h+=`<tr><td colspan="8" style="text-align:left;font-family:'Source Sans 3';color:var(--crit)">Ningún DN de la serie transporta ${fmt(qd,0)} l/s cumpliendo el criterio con esta pendiente y calado.</td></tr>`;
+  $("table").innerHTML=h;
+}
+$("fam").addEventListener("change",()=>{fillSeries();render();});
+$("ser").addEventListener("change",()=>{fillDN();render();});
+$("norma").addEventListener("change",()=>{applyNorma();render();});
+$("red").addEventListener("change",()=>{applyNorma();render();});
+$("formula").addEventListener("change",()=>{ const n=norma(); $("coef").value=$("formula").value==="manning"?n.n:n.k; syncCoefLabel(); render(); });
+["dn","coef","pend","fill","qdis"].forEach(id=>$(id).addEventListener("input",render));
+["pformula"].forEach(id=>$(id).addEventListener("change",()=>{ $("pcoef").value=$("pformula").value==="hw"?150:0.10; syncPCoefLabel(); render(); }));
+["pcoef","vmin","vmax","pq","plen","temp"].forEach(id=>$(id).addEventListener("input",render));
+["pob","dot","cret","infil","cpval","area","ival","tc","pd"].forEach(id=>$(id).addEventListener("input",render));
+["cpmet","cesc","imet","i1id","redtipo"].forEach(id=>$(id).addEventListener("change",render));
+["ciudad","tret"].forEach(id=>$(id).addEventListener("change",()=>{applyCiudad();render();}));
+$("usarq").addEventListener("click",()=>{ const q=flow().Qd; $("qdis").value=q<10?q.toFixed(2):Math.round(q); setMode("grav"); $("tab-grav").focus(); });
+function setMode(m){ MODE=m; document.documentElement.setAttribute("data-mode",m); document.querySelectorAll(".tab").forEach(t=>{ const on=t.dataset.mode===m; t.classList.toggle("active",on); t.setAttribute("aria-selected",on); });
+  $("subtitle").textContent=m==="grav"?"Caudal y velocidad calculados con el diámetro interior real de cada tubo GPF y con el criterio de proyecto del gestor que elijas.":"Pérdida de carga y velocidad en tubería llena, con el diámetro interior real de cada serie de presión GPF.";
+  $("legend").innerHTML=`<span><i class="sel"></i>DN seleccionado</span><span><i></i>Resto de la serie</span><span><i class="dash"></i>v &lt; v mín.</span><span><i class="dot"></i>v &gt; v máx.</span>`;
+  $("eyebrow").textContent=m==="grav"?"Grupo GPF · Saneamiento por gravedad":m==="pres"?"Grupo GPF · Abastecimiento, riego e impulsiones":"Grupo GPF · Caudales de cálculo para saneamiento";
+  if(m==="flow") $("subtitle").textContent="Caudal de diseño por población y dotación (residuales) y por método racional (pluviales), con el DN mínimo que lo transporta.";
+  if(m==="mec"){ $("eyebrow").textContent="Grupo GPF · Tuberías enterradas · UNE 53331"; $("subtitle").textContent="Comprueba si el tubo elegido aguanta las tierras y el tráfico: deformación, rotura y aplastamiento a corto y largo plazo."; }
+  if(m==="flow") $("legend").innerHTML=`<span><i class="sel"></i>Método elegido</span><span><i></i>Otros métodos</span>`;
+  const prev=MODE_PREV; MODE_PREV=m; if(m==="mec"&&(prev==="grav"||prev==="pres")) setMecSrc(prev); if(presCat(m)!==presCat(prev)){ $("dn").innerHTML=""; fillProducts(); fillSeries(); } if(m==="mec"){ syncPi(); syncB(); } render(); }
+// ---------- Cálculo mecánico (Ábaco_pro) ----------
+const MEC_VER="v1.2 · 9-oct-2026";
+const MECDATA={
+  ecosan:{E:{LP:1750,CP:3600},sig:{LP:45,CP:81},lbl:"pared estructurada · se calcula con el espesor equivalente",
+    SN4:{160:[4,4.5],200:[4.9,5.4],250:[6,7.0],315:[7.2,8.0],400:[9.2,10.3],500:[11.6,12.9],630:[14.4,16.2],800:[19.6,21.4]},
+    SN8:{110:[3.2,3.7],125:[3.5,4.0],160:[4.8,5.3],200:[6.2,6.9],250:[7.3,8.2],315:[9.3,10.4],400:[11.9,13.2],500:[14.4,16.5],630:[17.8,20.2],800:[23.4,26.8]}},
+  pvc1401:{E:{LP:1750,CP:3600},sig:{LP:50,CP:90},lbl:"pared maciza · espesor real"},
+  pvcpres:{E:{LP:1750,CP:3600},sig:{LP:50,CP:90},lbl:"PVC-U presión · espesor real",pres:1},
+  pvco:{E:{LP:2800,CP:4000},sig:{LP:70,CP:100},lbl:"PVC-O 500 · espesor real",pres:1},
+  pvc1452:{E:{LP:1750,CP:3600},sig:{LP:50,CP:90},lbl:"PVC-U presión W+P · espesor real"},
+  tuplen:{E:{LP:200,CP:800},sig:{LP:19.3,CP:23},wf:0.6505,lbl:"PE100 · espesor real",pres:1}
+};
+const pnOf=s=>parseFloat(String(s).replace("PN","").replace(",","."));
+function mecTube(){
+  const fam=$("fam").value, ser=$("ser").value, dn=$("dn").value, M=MECDATA[fam];
+  if(!M) return {err:"El cálculo mecánico está disponible para GPF ecoSan, GPF PVC Compacto, GPF PVC Presión, GPF PVC Biorientado y GPF TUPLEN. Para Condusan llegará en la versión final."};
+  let e,eeq;
+  if(fam==="ecosan"){ const r=(M[ser]||{})[dn]; if(!r) return {err:`GPF ecoSan ${ser} DN ${dn} no tiene datos de cálculo mecánico (el programa de Tuyper tampoco lo admite). Elige SN8 o un DN a partir de 160.`}; [e,eeq]=r; }
+  else { const di=serie().dn.find(x=>x[0]===dn)[1]; e=+((+dn-di)/2).toFixed(1); eeq=e; }
+  return {DN:+dn,e,eeq,E:M.E,sig:M.sig,lbl:M.lbl,wf:M.wf||1,pres:!!M.pres,PN:M.pres?pnOf(ser):0};
+}
+function mecParams(){
+  const t=mecTube(); if(t.err) return t;
+  const nv=(id,label,o)=>num(id,label,o);
+  const p={...t,inst:$("minst").value,seg:+$("mseg").value,H:nv("mH","Altura de relleno H",{min:0.3}),B:nv("mB","Anchura de zanja B",{gt:t.DN/1000}),
+    beta:nv("mbeta","Talud β",{min:30}),Ha:nv("mHa","Nivel freático",{min:0}),ang:+$("mang").value,fill:+$("mfill").value,fill2:+$("mfill2").value,fillInst:+$("mfinst").value,
+    gamma:nv("mgamma","Peso del relleno",{min:10,max:25}),E1:nv("mE1","E1",{gt:0}),E2:nv("mE2","E2",{gt:0}),E3:nv("mE3","E3",{gt:0}),E4:nv("mE4","E4",{gt:0}),
+    veh:null, pav:null, rep:null, Pi:0, kPaBar:+$("mkpa").value};
+  const ov=$("mveh").value;
+  if(p.inst==="zanjaterr"){ p.Ht=nv("mHt","Altura del terraplén Ht",{min:0}); p.gammaT=nv("mgt","Peso del terraplén",{min:10,max:25}); }
+  if(p.inst==="terraplen"&&p.B<3*t.DN/1000){ ERR.push(`En terraplén B (relleno compactado alrededor del tubo) debe ser ≥ 3·DN = ${fm(3*t.DN/1000,2)} m, como en Tuyper y AseTUB.`); $("mB").classList.add("bad"); }
+  if(ov==="custom"){ p.veh="custom"; p.vehX={Pc:nv("mPc","Pc",{gt:0}),a:nv("ma","a",{gt:0}),b:nv("mb","b",{gt:0}),ejes:+$("mejes").value,phi:nv("mphi","Coeficiente de impacto φ",{min:1,max:2})}; }
+  else if(ov==="rep"){ const cd=$("mCd").value.trim(); p.rep={Pd:nv("mPd","Pd",{min:0}),l:nv("mrl","Largo de la carga",{gt:0}),a:nv("mra","Ancho de la carga",{gt:0}),imp:$("mimp").value,Cd:cd===""?null:nv("mCd","Cd",{min:0,max:1})}; }
+  else if(ov) p.veh=ov;
+  if(t.pres) p.Pi=$("mPi").value.trim()===""?0:nv("mPi","Presión de trabajo",{min:0,max:40});
+  if(p.beta>90){ ERR.push("El talud β no puede superar 90º."); $("mbeta").classList.add("bad"); }
+  if(ov&&$("mpav").value==="1") p.pav={h1:nv("mh1","h1",{min:0,max:1}),Ef1:nv("mef1","Ef1",{gt:0,max:35000}),h2:nv("mh2","h2",{min:0,max:1}),Ef2:nv("mef2","Ef2",{gt:0,max:35000})};
+  return p;
+}
+const fm=(x,d=2)=>Number.isFinite(x)?x.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d}):"—";
+function drawMecSection(p,r){
+  const W=360,Hh=260,band=p.inst==="zanjaterr"&&p.Ht>0?Math.min(40,12+p.Ht*12):0,gy=20+band,pipeD=Math.min(90,Math.max(40,p.DN/9)), scale=150/Math.max(p.H+p.DN/1000+0.3,1.2);
+  const bpx=Math.min(250,Math.max(pipeD+30,p.B*scale)), cx=180, crownY=gy+Math.min(150,p.H*scale), cy=crownY+pipeD/2, bot=cy+pipeD/2+14;
+  const tw=bpx/2+(p.beta<90?(bot-gy)/Math.tan(p.beta*Math.PI/180):0);
+  let s=`<rect x="0" y="${gy}" width="${W}" height="${Hh-gy}" fill="var(--soil)"/>`;
+  if(band) s+=`<rect x="0" y="20" width="${W}" height="${band}" fill="var(--soil2)" stroke="var(--muted)" stroke-width="1"/><text x="6" y="${20+band/2+4}" fill="var(--ink)">Terraplén Ht ${fm(p.Ht,2)} m</text>`;
+  s+=`<polygon points="${cx-tw},${gy} ${cx+tw},${gy} ${cx+bpx/2},${bot} ${cx-bpx/2},${bot}" fill="var(--trench)" stroke="var(--muted)" stroke-width="1"/>`;
+  s+=`<rect x="${cx-bpx/2}" y="${cy}" width="${bpx}" height="${bot-cy}" fill="var(--soil2)"/>`;
+  if(p.Ha>0){ const wy=crownY-Math.min(p.Ha*scale,crownY-gy); s+=`<line x1="0" y1="${wy}" x2="${W}" y2="${wy}" stroke="var(--water)" stroke-width="1.5" stroke-dasharray="6 4"/><text x="${W-6}" y="${wy-4}" text-anchor="end" fill="var(--water)">Ha ${fm(p.Ha,1)} m</text>`; }
+  s+=`<circle cx="${cx}" cy="${cy}" r="${pipeD/2}" fill="var(--panel)" stroke="var(--brand)" stroke-width="5"/>`;
+  s+=`<line x1="${Math.min(W-60,cx+tw+14)}" y1="${gy}" x2="${Math.min(W-60,cx+tw+14)}" y2="${crownY}" stroke="var(--ink)" stroke-width="1"/><text x="${Math.min(W-56,cx+tw+18)}" y="${(gy+crownY)/2}" fill="var(--ink)">H ${fm(p.H,2)} m</text>`;
+  s+=`<line x1="${cx-bpx/2}" y1="${bot+12}" x2="${cx+bpx/2}" y2="${bot+12}" stroke="var(--ink)" stroke-width="1"/><text x="${cx}" y="${bot+26}" text-anchor="middle" fill="var(--ink)">B ${fm(p.B,2)} m</text>`;
+  s+=`<text x="${cx}" y="${cy+4}" text-anchor="middle" fill="var(--ink)">DN ${p.DN}</text>`;
+  if(r.Pvc>0) s+=`<text x="${cx}" y="14" text-anchor="middle" fill="var(--brand)">▼ ${p.veh==="custom"?"Pc "+fm(p.vehX.Pc,0)+" kN":p.veh} · ${fm(r.Pvc,1)} kN/m²</text>`;
+  if(r.Pvr>0) s+=`<text x="${cx}" y="14" text-anchor="middle" fill="var(--brand)">▼▼▼ Pd ${fm(p.rep.Pd,0)} kN/m² · Cd ${fm(r.Cd,3)}</text>`;
+  s+=`<text x="6" y="${Hh-8}" fill="var(--muted)">2α ${p.ang}º · β ${p.beta}º</text>`;
+  if(p.Pi>0) s+=`<text x="${W-6}" y="${Hh-8}" text-anchor="end" fill="var(--brand)">Pi ${fm(p.Pi,1)} bar</text>`;
+  $("msec").innerHTML=s;
+}
+function renderMec(){
+  const ov=$("mveh").value, zt=$("minst").value==="zanjaterr";
+  $("mterbox").hidden=!zt; $("mterhint").hidden=!zt; $("mcusbox").hidden=ov!=="custom"; $("mrepbox").hidden=ov!=="rep";
+  $("mpavf").hidden=!ov; $("mpavbox").hidden=!ov||$("mpav").value!=="1";
+  const p=mecParams();
+  const clear=(msg)=>{ $("mverdict").className="mverdict ko"; $("mpill").textContent="Sin cálculo"; $("mwhy").textContent=msg; $("mwarn").hidden=true; setTimeout(syncBar); ["mkpis","mchk","mdet","msec"].forEach(id=>$(id).innerHTML=""); };
+  if(p.err){ clear(p.err); return; }
+  if(ERR.length){ clear("Corrige los datos marcados."); return; }
+  const r=MEC.calc(p), L=r.LP, C=r.CP, fails=r.checks.filter(c=>!c.ok);
+  $("mverdict").className="mverdict "+(r.ok?"ok":"ko"); $("mpill").textContent=r.ok?"Instalación válida":"Instalación no válida";
+  $("mwhy").textContent=r.ok?`Cumple a corto y largo plazo con seguridad ${p.seg===2.5?"A (≥ 2,5)":"B (≥ 2,0)"} y deformación ≤ 5 %.`:"No cumple: "+[...new Set(fails.map(c=>c.que.toLowerCase()+" ("+(c.t==="LP"?"largo":"corto")+" plazo)"))].join(", ")+".";
+  if(t0pres(p)){ const base=MEC.calc({...p,Pi:0}); const pm=piMax(p,base);
+    let w=` Sin presión interior: ${base.ok?"válida":"no válida"}. ${!base.ok?"La instalación no admite presión interior.":pm>=p.PN?`Admite la PN completa (${fm(p.PN,1)} bar) con esta instalación.`:`Presión de trabajo máxima con esta instalación: ${fm(pm,1)} bar (PN de la serie ${fm(p.PN,1)}).`}`;
+    if(p.Pi>0){ w+=` Calculado con Pi = ${fm(p.Pi,1)} bar${p.Pi>p.PN?" (por encima de la PN)":""}.`; const alt=MEC.calc({...p,kPaBar:p.kPaBar===100?98:100});
+      if(alt.ok!==r.ok) w+=` Caso límite: con 1 bar = ${p.kPaBar===100?98:100} kN/m² el resultado sería «${alt.ok?"válida":"no válida"}».`; }
+    else w+=` Escribe la presión de trabajo de la red para comprobarla.`;
+    $("mwhy").textContent+=w; }
+  const bd=p.B/(p.DN/1000), warns=[], bm=bMin1610(p.DN,p.H);
+  if(p.inst!=="terraplen"&&p.B<bm-1e-9) warns.push(`B menor que el ancho mínimo de zanja de UNE-EN 1610 (${fm(bm,2)} m para DN ${p.DN} y H ${fm(p.H,1)} m). Una zanja más estrecha favorece el cálculo (efecto silo) pero no es ejecutable: usa al menos ese ancho.`);
+  if(p.inst!=="terraplen"&&bd>=4) warns.push(`B ≥ 4·DN: la concentración de carga se calcula como en terraplén (el efecto silo de la zanja se mantiene).`);
+  if(p.H>6) warns.push(`Recubrimiento alto (H > 6 m): en zanja el resultado depende mucho del efecto silo, que exige paredes estables a largo plazo. Contrástalo con el cálculo del proyecto.`);
+  if(p.Ha>p.H+(p.inst==="zanjaterr"?p.Ht:0)) warns.push(`El freático queda por encima del terreno; revisa Ha.`);
+  if(p.pav&&r.He-p.H-(p.Ht||0)>1.5) warns.push(`El firme equivale a ${fm(r.He-p.H-(p.Ht||0),2)} m de relleno adicional para el reparto de la sobrecarga (profundidad de cálculo He = ${fm(r.He,2)} m). Comprueba Ef y espesores.`);
+  if(p.veh==="HT26") warns.push("Tuyper y AseTUB calculan el HT 26 como el HT 39 (3 ejes, φ 1,2); el ábaco usa el HT 26 real (2 ejes, φ 1,4), algo más desfavorable.");
+  if(p.veh==="custom"){ const ref=aseRule(p.vehX.Pc); if(ref.ejes!==p.vehX.ejes||Math.abs(ref.phi-p.vehX.phi)>1e-6){ const alt=MEC.calc({...p,vehX:{...p.vehX,...ref}}); warns.push(`Con Pc ${fm(p.vehX.Pc,0)} kN, Tuyper y AseTUB calculan con ${ref.ejes} ejes y φ ${fm(ref.phi,1)} aunque se indique otra cosa: allí la sobrecarga sería ${fm(alt.Pvc,1)} kN/m² (aquí ${fm(r.Pvc,1)}) y la instalación «${alt.ok?"válida":"no válida"}».`); } }
+  if(p.rep&&p.rep.Cd==null) warns.push(`Cd = ${fm(r.Cd,3)} calculado con Boussinesq a He = ${fm(r.He,2)} m. Tuyper y AseTUB leen Cd de un gráfico y pueden dar hasta un 30 % menos; si quieres reproducirlos, escribe su Cd.`);
+  if(L.aDout||C.aDout) warns.push("Pandeo por agua exterior fuera del rango contrastado con Tuyper/AseTUB: αD se toma por el lado seguro.");
+  $("mwarn").textContent=warns.join(" "); $("mwarn").hidden=!warns.length;
+  const minEta=fl(Math.min(...L.eta,...C.eta),1), minN=fl(Math.min(L.n1,L.n2,L.n3,C.n1,C.n2,C.n3),1), dv=ce(Math.max(L.Dv,C.Dv),2);
+  const k=(t,v,u,s,bad)=>`<div class="tile ${bad?"bad":""}"><div class="k">${t}</div><div class="v">${v}<span class="u">${u}</span></div><div class="s">${s}</div></div>`;
+  $("mkpis").innerHTML=k("Presión vertical",fm(L.qvt,1),"kN/m²",(r.Pvc+r.Pvr)>0?`tierras ${fm(L.qv,1)} + ${r.Pvr>0?"repartida":"tráfico"} ${fm(r.Pvc+r.Pvr,1)}`:"tierras · largo plazo")
+    +k("Deformación",fm(dv,2),"%","máximo 5 %",dv>5)+k("Seguridad a rotura",fm(minEta,1),"","mínimo en clave, riñones y base",minEta<p.seg)+k("Seguridad a aplastamiento",fm(minN,1),"","terreno, agua exterior y combinado",minN<p.seg);
+  $("mchk").innerHTML=r.checks.map(c=>`<div><span class="dot ${c.ok?"ok":"ko"}"></span><span>${c.que} <span class="mtag">${c.t==="LP"?"largo":"corto"}</span></span><span class="val">${fm(c.menor?ce(c.val,2):fl(c.val,2),2)}${c.unit?" "+c.unit:""}</span><span class="lim">${c.menor?"≤ ":"≥ "}${fm(c.lim,1)}</span></div>`).join("");
+  const R=[["g","Tubo"],["","Espesor de cálculo (mm)",()=>p.eeq,1],["","Rigidez St (kN/m²)",x=>x.St],
+    ["g","Presiones (kN/m²)"],["","Tierras qv",x=>x.qv],...(p.inst==="zanjaterr"?[["","Terraplén sobre la zanja (reducido) κ0·γt·Ht",()=>r.sT]]:[]),...((r.Pvc+r.Pvr)>0?[["","Profundidad de cálculo de la sobrecarga He (m)",()=>r.He]]:[]),["","Tráfico Pvc",()=>r.Pvc],...(p.rep?[["","Coeficiente Cd",()=>r.Cd,3],["","Carga repartida Pd·Cd·φ",()=>r.Pvr]]:[]),["","Vertical total qvt",x=>x.qvt],["","Lateral del relleno qh",x=>x.qh],["","Reacción lateral qh*",x=>x.qht],
+    ["g","Deformación"],["","Δdv/dm (%)",x=>x.Dv],
+    ...(p.Pi>0?[["g","Presión interior"],["","Axil por presión Npa (kN/m)",()=>r.Npa,3],["","Momento por presión Mpa (kN·m/m)",()=>r.Mpa,5]]:[]),
+    ["g","Momentos (kN·m/m)"],["","Clave",x=>x.M[0],5],["","Riñones",x=>x.M[1],5],["","Base",x=>x.M[2],5],
+    ["g","Axiles (kN/m)"],["","Clave",x=>x.N[0],3],["","Riñones",x=>x.N[1],3],["","Base",x=>x.N[2],3],
+    ["g","Tensión (N/mm²)"],["","Clave",x=>x.sig[0]],["","Riñones",x=>x.sig[1]],["","Base",x=>x.sig[2]],
+    ["g","Seguridad a rotura"],["","Clave",x=>x.eta[0]],["","Riñones",x=>x.eta[1]],["","Base",x=>x.eta[2]],
+    ["g","Seguridad a aplastamiento"],["","Terreno η1",x=>x.n1],["","Agua exterior η2",x=>x.n2],["","Combinado η3",x=>x.n3]];
+  $("mdet").innerHTML="<thead><tr><th>Magnitud</th><th>Largo plazo</th><th>Corto plazo</th></tr></thead><tbody>"+R.map(d=>d[0]==="g"?`<tr class="grp"><td colspan="3">${d[1]}</td></tr>`:`<tr><td>${d[1]}</td><td>${fm(d[2](L),d[3]||2)}</td><td>${fm(d[2](C),d[3]||2)}</td></tr>`).join("")+"</tbody>";
+  drawMecSection(p,r); fillPrint(p,r); syncBar();
+  return r;
+}
+["minst","mseg","mang","mfill","mfill2","mfinst","mveh","mpav","mkpa","mejes","mimp"].forEach(id=>$(id).addEventListener("change",render));
+["mPi","mHt","mgt","mPc","mphi","ma","mb","mPd","mrl","mra","mCd","mproj","mtramo","mautor","mH","mB","mbeta","mHa","mE1","mE2","mE3","mE4","mgamma","mh1","mef1","mh2","mef2"].forEach(id=>$(id).addEventListener("input",render));
+function setMecSrc(k){ MECSRC=k; $("mkind").value=k; document.documentElement.setAttribute("data-mecsrc",k); }
+function syncPi(){ const t=mecTube(); if(t.pres&&!t.err) $("mpnhint").textContent=`PN de la serie: ${fm(t.PN,1)} bar.`; }
+$("tomec").addEventListener("click",()=>{ setMecSrc("grav"); setMode("mec"); syncB(); render(); $("tab-mec").focus(); });
+$("tomecp").addEventListener("click",()=>{ setMecSrc("pres"); setMode("mec"); syncPi(); syncB(); render(); $("tab-mec").focus(); });
+$("mkind").addEventListener("change",()=>{ setMecSrc($("mkind").value); $("dn").innerHTML=""; fillProducts(); fillSeries(); syncPi(); render(); });
+["fam","ser"].forEach(id=>$(id).addEventListener("change",()=>{ if(MODE==="mec") { syncPi(); syncB(); render(); } }));
+$("dn").addEventListener("change",()=>{ if(MODE==="mec"){ syncB(); render(); } });
+let B_EDIT=false; $("mB").addEventListener("input",()=>{ B_EDIT=true; });
+function syncB(){ if(B_EDIT) return; const t=mecTube(); if(t.err) return; const H=parseFloat($("mH").value)||2; const b=Math.ceil(Math.max(bMin1610(t.DN,H),0.9)*20)/20; if($("minst").value!=="terraplen") $("mB").value=b; else $("mB").value=Math.ceil(3*t.DN/1000*20)/20; }
+$("minst").addEventListener("change",()=>{ if(MODE==="mec"){ syncB(); render(); } });
+
+// Tabla de módulos E (N/mm²) según grupo de suelo y % Proctor normal (Tuyper / AseTUB)
+const PROCTOR={85:[2.5,1.2,0.8,0.6],90:[6,3,2,1.5],92:[9,4,3,2],95:[16,8,5,4],97:[23,11,8,6],100:[40,20,14,10]};
+$("mprop").addEventListener("click",()=>{ const R=PROCTOR[$("mpr").value], T=PROCTOR[$("mpt").value];
+  $("mE1").value=R[+$("mfill").value]; $("mE2").value=R[+$("mfill2").value]; $("mE3").value=T[+$("mtn").value]; $("mE4").value=T[+$("mtn").value]; render(); });
+// Informe imprimible
+function fillPrint(p,r){
+  const sel=id=>{const e=$(id); return e.options[e.selectedIndex].text;};
+  const rows=[["Producto",$("fam").options[$("fam").selectedIndex].text+" · "+$("ser").value+" · DN "+p.DN],["Espesor de cálculo",fm(p.eeq,1)+" mm"],
+    ["Instalación",sel("minst")+" · H "+fm(p.H,2)+" m · B "+fm(p.B,2)+" m · β "+p.beta+"º"+(p.inst==="zanjaterr"?" · Ht "+fm(p.Ht,2)+" m ("+fm(p.gammaT,1)+" kN/m³)":"")],
+    ["Apoyo y freático","2α "+p.ang+"º · Ha "+fm(p.Ha,2)+" m sobre clave"],["Relleno",sel("mfill")+" sobre el tubo · "+sel("mfill2")+" junto al tubo · "+sel("mfinst")+" · γ "+fm(p.gamma,1)+" kN/m³"],
+    ["Módulos E1–E4",[p.E1,p.E2,p.E3,p.E4].map(x=>fm(x,1)).join(" · ")+" N/mm²"],["Sobrecarga",sel("mveh")+(p.vehX?` (Pc ${fm(p.vehX.Pc,0)} kN, ${p.vehX.ejes} ejes, a ${fm(p.vehX.a,1)} m, b ${fm(p.vehX.b,1)} m, φ ${fm(p.vehX.phi,2)})`:"")+(p.rep?` (Pd ${fm(p.rep.Pd,1)} kN/m², ${fm(p.rep.l,1)} × ${fm(p.rep.a,1)} m, Cd ${fm(r.Cd,3)}, ${sel("mimp")})`:"")+(p.pav?" · pavimentada":"")],
+    ...(p.Pi>0?[["Presión interior",fm(p.Pi,1)+" bar (1 bar = "+p.kPaBar+" kN/m²)"]]:[]),["Seguridad",sel("mseg")]];
+  const pj=[$("mproj").value,$("mtramo").value,$("mautor").value];
+  $("mprint").innerHTML=`<h2>Cálculo mecánico de tubería enterrada · UNE 53331</h2><p>${pj[0]?"<b>"+pj[0].replace(/</g,"&lt;")+"</b>":""}${pj[1]?" · Tramo "+pj[1].replace(/</g,"&lt;"):""}${pj[2]?" · "+pj[2].replace(/</g,"&lt;"):""} · ${new Date().toLocaleDateString("es-ES")}</p><table>${rows.map(x=>`<tr><th>${x[0]}</th><td>${x[1]}</td></tr>`).join("")}</table><p class="mdisc">Ábaco Saneamiento GPF · v1.0 · 19-oct-2026 · motor mecánico ${MEC_VER}. Cálculo orientativo de predimensionado según UNE 53331 / ATV-A 127, contrastado con los programas de Tuyper y AseTUB. No sustituye al cálculo justificativo del proyecto.</p>`;
+}
+$("mprintbtn").addEventListener("click",()=>{ const d=$("mdetbox"), was=d.open; d.open=true; window.print(); d.open=was; });
+
+// Ancho mínimo de zanja UNE-EN 1610 (tabla 1 por DN, entibada o talud > 60º; tabla 2 por profundidad)
+function bMin1610(DN,H){ const od=DN/1000, a=od+(DN<=225?0.40:DN<=350?0.50:DN<=700?0.70:DN<=1200?0.85:1.00), d=H+od; const b=d<1?0:d<=1.75?0.80:d<=4?0.90:1.00; return Math.max(a,b); }
+function aseRule(Pc){ return Pc===65||Pc===100?{ejes:3,phi:1.2}:Pc===150?{ejes:2,phi:1.0}:{ejes:2,phi:1.5}; }
+const fl=(x,d)=>Math.floor(x*10**d+1e-9)/10**d, ce=(x,d)=>Math.ceil(x*10**d-1e-9)/10**d;
+const t0pres=p=>!!p.pres;
+function piMax(p,base){ if(!(base||MEC.calc({...p,Pi:0})).ok) return 0; let lo=0,hi=40; if(MEC.calc({...p,Pi:hi}).ok) return hi; for(let i=0;i<30;i++){ const m=(lo+hi)/2; MEC.calc({...p,Pi:m}).ok?lo=m:hi=m; } return Math.floor(lo*10)/10; }
+window.addEventListener("beforeprint",()=>{ $("mdetbox").open=true; });
+// barra de veredicto fija en móvil
+function syncBar(){ const b=$("mbar"); if(!b) return; b.className="mbar "+($("mverdict").classList.contains("ok")?"ok":"ko"); b.textContent=$("mpill").textContent+" · ver resultado ↓"; }
+$("mbar").addEventListener("click",()=>$("mecpanel").scrollIntoView({behavior:"smooth"}));
+
+let MODE_PREV="grav";
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>setMode(t.dataset.mode)));
+document.documentElement.setAttribute("data-mode","grav");
+fillSeries(); $("norma").value="une752"; applyNorma(); render();
+</script>
+
+</body>
+</html>
