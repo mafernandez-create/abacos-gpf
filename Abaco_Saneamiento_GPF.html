@@ -2,7 +2,7 @@
 <html lang="es" data-mode="grav">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ábaco Saneamiento GPF</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -222,14 +222,14 @@ footer b{color:var(--ink);font-family:"Archivo";font-weight:600}
 :root:not([data-curves="1"])[data-mode="grav"] .chart-panel,:root:not([data-curves="1"])[data-mode="pres"] .chart-panel{display:none!important}
 @media (prefers-reduced-motion: no-preference){#dl-disc{transition:transform .12s ease-out} #dial.grab #dl-disc{transition:none}}
 @media print{.dial-panel{break-inside:avoid}.btn.ghost{display:none}}
-@media (max-width:600px){
- .dl-rl{display:none} .dl-rl.maj{display:inline;font-size:22px}
- .dl-ml{font-size:19px!important} .dl-mk.sel .dl-ml{font-size:21px!important}
- .dl-il{font-size:19px} .dl-it{stroke-width:1.6}
- .dl-wtitle{font-size:16px} .dl-rtitle{font-size:18px}
- .dl-h0{font-size:17px} .dl-h1{font-size:42px} .dl-hu{font-size:19px} .dl-h1s{font-size:22px} .dl-h2{font-size:19px} .dl-h3{font-size:17px}
- .dl-qdt{display:none}
-}
+/* rótulos grandes cuando el dial se ve pequeño */
+#dial.big .dl-rl{display:none} #dial.big .dl-rl.maj{display:inline;font-size:22px}
+#dial.big .dl-ml{font-size:19px!important} #dial.big .dl-mk.sel .dl-ml{font-size:21px!important}
+#dial.big .dl-il{font-size:19px} #dial.big .dl-it{stroke-width:1.6}
+#dial.big .dl-wtitle{font-size:14px;letter-spacing:.1em} #dial.big .dl-rtitle{font-size:18px}
+#dial.big .dl-h0{font-size:17px} #dial.big .dl-h1{font-size:42px} #dial.big .dl-hu{font-size:19px} #dial.big .dl-h1s{font-size:22px} #dial.big .dl-h2{font-size:19px} #dial.big .dl-h3{font-size:17px}
+#dial.big .dl-qdt{display:none}
+
 .dial-btns{display:flex;gap:8px;flex-wrap:wrap}
 .hprint{display:none;margin:0;font-size:12px;color:var(--text)}
 @media print{.hprint{display:block}}
@@ -242,6 +242,105 @@ footer b{color:var(--ink);font-family:"Archivo";font-weight:600}
 @media (hover:none){.dial-keys{display:none}}
 @media print{.dial-cap,.dial-num,.dial-legend span:last-child{display:none!important}}
 .dial-num input.bad{outline:2px solid var(--crit);background:var(--crit-bg)} #dialmsg{color:var(--crit);min-width:0}
+
+/* ===== Comportamiento por dispositivo =====
+   Móvil vertical (≤600 px): cabecera compacta, pestañas fijas arriba, dial primero, datos plegables, tabla con columnas clave y barra de resultado fija.
+   Móvil horizontal (poca altura): dial a la izquierda ajustado a la altura y controles a la derecha.
+   Tablet vertical: dial arriba y datos en dos columnas.
+   Escritorio y tablet horizontal: panel de datos fijo al desplazar y dial ajustado a la altura de la pantalla.
+   Táctil (cualquier tamaño): controles de 44 px y texto de 16 px en los campos (evita el zoom automático de iPhone). */
+body{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+#ctltoggle,.hbar,.tblhint{display:none}
+.tab .ts{display:none}
+/* tablets y portátiles: cabecera más baja para que el dial quepa entero */
+@media (max-width:1279px),(max-height:820px){ .sub{display:none} header{padding:12px 0 10px} .tabs{margin-top:10px} }
+
+/* --- táctil --- */
+@media (pointer:coarse){
+  .field select,.field input[type=number],input[type=text],.dial-num input{font-size:16px;min-height:44px}
+  .btn{min-height:44px} .btn.sm{min-width:44px}
+  .tab{padding:12px 14px}
+  .range input[type=range]{height:32px}
+  .dl-mk .dl-hit{stroke:transparent;stroke-width:10}
+}
+
+/* --- escritorio y tablet horizontal --- */
+@media (min-width:901px){
+  .layout>aside{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain}
+  #dial{max-width:min(640px,calc(100vh - 230px))}
+  @supports (height:100svh){ #dial{max-width:min(640px,calc(100svh - 230px))} }
+}
+@media (min-width:1500px){ .layout{grid-template-columns:340px 1fr} }
+
+/* --- tablet vertical --- */
+@media (min-width:601px) and (max-width:1100px) and (orientation:portrait){
+  .layout{grid-template-columns:1fr}
+  .layout>aside{grid-row:auto;position:static;max-height:none;overflow:visible}
+  .layout>section{grid-column:auto}
+  .dial-panel{order:-1}
+  #dial{max-width:min(600px,calc(100vh - 420px))}
+  aside.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px;row-gap:13px;align-items:start}
+  aside.controls>.divider,aside.controls>.sect,aside.controls>.hint,aside.controls>.mprop,aside.controls>.btn,aside.controls>#mpavbox,aside.controls>[id$="box"]{grid-column:1/-1}
+}
+
+/* --- móvil vertical --- */
+@media (max-width:600px){
+  body{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+  header{padding:12px 0 10px;gap:8px 12px;border-bottom-width:2px}
+  .logo{height:30px}
+  .eyebrow,.sub,.title h1 .ver{display:none!important}
+  .tab{font-size:13px;padding:10px 10px} .tab .tl{display:none} .tab .ts{display:inline}
+  .title h1{font-size:19px}
+  .tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);margin-top:8px}
+  .layout{margin-top:12px;gap:12px}
+  .dial-panel{padding:8px 8px 10px}
+  .dial-head h2{font-size:14px}
+  .dial-btns .btn{padding:6px 10px;font-size:12.5px}
+  #dialprint{display:none}
+  .dial-legend{font-size:12px;gap:4px 12px}
+  /* datos plegables (gravedad y presión): quedan a la vista producto, serie, DN y calado */
+  #ctltoggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font:600 14px "Archivo",system-ui,sans-serif;text-align:left;cursor:pointer}
+  #ctltoggle small{display:block;font:400 12.5px "Source Sans 3",system-ui,sans-serif;color:var(--muted);margin-top:2px}
+  #ctltoggle b{font-size:18px;color:var(--brand)}
+  [data-mode="flow"] #ctltoggle,[data-mode="mec"] #ctltoggle{display:none}
+  :root:not(.ctl-open)[data-mode="grav"] aside.controls>:not(.keep):not(#ctltoggle),
+  :root:not(.ctl-open)[data-mode="pres"] aside.controls>:not(.keep):not(#ctltoggle){display:none!important}
+  /* tabla con las columnas clave; girando el móvil se ven todas */
+  .tblhint{display:block;font-size:12px;color:var(--muted);margin:4px 0 0}
+  [data-mode="grav"] #table tr>:nth-child(2),[data-mode="grav"] #table tr>:nth-child(5),[data-mode="grav"] #table tr>:nth-child(6),[data-mode="grav"] #table tr>:nth-child(7),
+  [data-mode="pres"] #table tr>:nth-child(2),[data-mode="pres"] #table tr>:nth-child(6),
+  [data-mode="flow"] #table tr>:nth-child(3){display:none}
+  [data-mode="mec"] .tblhint{display:none}
+  #table th,#table td{padding:7px 6px}
+  .results{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tile .v{font-size:20px}
+  .results>.tile:last-child:nth-child(odd){grid-column:1/-1}
+  footer{flex-direction:column}
+  /* barra de resultado fija cuando el dial sale de la pantalla */
+  .dial-out[data-mode="grav"] .hbar,.dial-out[data-mode="pres"] .hbar{display:flex}
+  .hbar{position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:40;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 14px;background:var(--navy);color:var(--bg);font:600 12.5px "JetBrains Mono",ui-monospace,monospace;white-space:nowrap;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.28);cursor:pointer;text-align:left}
+  .hbar i{width:10px;height:10px;border-radius:50%;flex:none;background:var(--ok)} .hbar i.st-warn,.hbar i.st-fill{background:var(--warn)} .hbar i.st-crit,.hbar i.st-dn{background:var(--brand)}
+  .hbar span{margin-left:auto;font:600 12px "Archivo",system-ui,sans-serif;opacity:.8;white-space:nowrap}
+}
+
+/* --- móvil horizontal --- */
+@media (orientation:landscape) and (max-height:520px){
+  header{padding:8px 0;gap:6px 14px;border-bottom-width:2px}
+  .logo{height:28px} .eyebrow,.sub{display:none} .title h1{font-size:18px}
+  .tabs{margin-top:6px}
+  .layout{grid-template-columns:1fr;margin-top:10px}
+  .layout>aside{grid-row:auto;position:static;max-height:none;overflow:visible}
+  .layout>section{grid-column:auto}
+  .dial-panel{order:-1;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"wrap head" "wrap num" "wrap cap" "wrap legend" "wrap keys";align-items:start;column-gap:18px;row-gap:8px}
+  .dial-panel>.dial-head{grid-area:head} .dial-panel>.dial-wrap{grid-area:wrap} .dial-panel>.dial-num{grid-area:num;justify-content:flex-start}
+  .dial-panel>.dial-cap{grid-area:cap} .dial-panel>.dial-legend{grid-area:legend} .dial-panel>.dial-keys{grid-area:keys}
+  #dial{width:calc(100vh - 40px);max-width:calc(100vh - 40px)}
+  @supports (height:100svh){ #dial{width:calc(100svh - 40px);max-width:calc(100svh - 40px)} }
+  aside.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px;row-gap:12px;align-items:start}
+  aside.controls>.divider,aside.controls>.sect,aside.controls>.hint,aside.controls>.mprop,aside.controls>.btn,aside.controls>#mpavbox,aside.controls>[id$="box"]{grid-column:1/-1}
+}
+@media print{#ctltoggle,.hbar,.tblhint{display:none!important}}
+#msec{max-width:520px;margin:0 auto}
 
 .title h1 .ver{display:inline-block;vertical-align:middle;font:500 11px "JetBrains Mono",monospace;color:var(--muted);margin-left:8px;position:relative;top:-3px}
 </style>
@@ -259,16 +358,17 @@ footer b{color:var(--ink);font-family:"Archivo";font-weight:600}
   <p class="sub" id="subtitle">Caudal y velocidad calculados con el diámetro interior real de cada tubo GPF y con el criterio de proyecto del gestor que elijas.</p>
 </header>
 <nav class="tabs" role="tablist">
-  <button class="tab active" id="tab-grav" role="tab" aria-selected="true" data-mode="grav">Saneamiento por gravedad</button>
-  <button class="tab" id="tab-flow" role="tab" aria-selected="false" data-mode="flow">Caudal de diseño</button>
-  <button class="tab" id="tab-mec" role="tab" aria-selected="false" data-mode="mec">Cálculo mecánico</button>
+  <button class="tab active" id="tab-grav" role="tab" aria-selected="true" data-mode="grav"><span class="tl">Saneamiento por gravedad</span><span class="ts">Gravedad</span></button>
+  <button class="tab" id="tab-flow" role="tab" aria-selected="false" data-mode="flow"><span class="tl">Caudal de diseño</span><span class="ts">Caudal</span></button>
+  <button class="tab" id="tab-mec" role="tab" aria-selected="false" data-mode="mec"><span class="tl">Cálculo mecánico</span><span class="ts">Mecánico</span></button>
 </nav>
 
 <div class="layout">
   <aside class="panel controls">
+    <button id="ctltoggle" type="button" aria-expanded="false" aria-controls="ctlbody"><span>Datos del cálculo<small id="ctlsum"></small></span><b aria-hidden="true">▾</b></button>
     <div class="field mec-only" hidden><label for="mkind">Tubería</label><select id="mkind"><option value="grav">Saneamiento (sin presión)</option><option value="pres">Presión (abastecimiento, riego, impulsión)</option></select></div>
-    <div class="field"><label for="fam">Producto</label><select id="fam"></select><div class="hint" id="famhint"></div></div>
-    <div class="row2">
+    <div class="field keep"><label for="fam">Producto</label><select id="fam"></select><div class="hint" id="famhint"></div></div>
+    <div class="row2 keep">
       <div class="field"><label for="ser">Serie</label><select id="ser"></select></div>
       <div class="field"><label for="dn">Diámetro</label><select id="dn"></select></div>
     </div>
@@ -334,7 +434,7 @@ footer b{color:var(--ink);font-family:"Archivo";font-weight:600}
     <hr class="divider grav-only">
     <div class="field grav-only"><label for="pend">Pendiente</label>
       <div class="range"><input type="range" id="pend" min="-0.3" max="2" step="any" value="0.7"><output id="pendout" for="pend">5 ‰</output></div></div>
-    <div class="field grav-only"><label for="fill">Calado h/D</label>
+    <div class="field grav-only keep"><label for="fill">Calado h/D</label>
       <div class="range"><input type="range" id="fill" min="10" max="100" step="1" value="75"><output id="fillout" for="fill">75 %</output></div></div>
     <div class="field grav-only"><label for="qdis">Caudal de diseño (opcional)</label><input type="number" id="qdis" step="1" min="0" placeholder="l/s"><div class="hint">Marca en la tabla el menor DN que lo transporta con la pendiente y el calado fijados.</div></div>
 
@@ -435,7 +535,8 @@ footer b{color:var(--ink);font-family:"Archivo";font-weight:600}
     </details>
   </aside>
 
-    <section class="panel dial-panel" id="dialpanel" aria-label="Ábaco circular">
+  <button class="hbar" id="hbar" type="button" aria-label="Volver al ábaco">—</button>
+  <section class="panel dial-panel" id="dialpanel" aria-label="Ábaco circular">
     <div class="dial-head">
       <h2 id="dialtitle">Ábaco circular</h2><div class="dial-btns">
       <button class="btn ghost" id="dialprint" type="button">Imprimir</button><button class="btn ghost" id="curvesbtn" type="button" aria-pressed="false">Ver también como curvas</button></div>
@@ -473,6 +574,7 @@ footer b{color:var(--ink);font-family:"Archivo";font-weight:600}
 <div class="results" id="results"></div>
 
 <h2 class="sec" id="tabletitle">Toda la gama a la pendiente fijada</h2>
+<p class="tblhint">Gira el móvil para ver todas las columnas.</p>
 <div class="tablewrap"><table id="table"></table></div>
 
 <p class="foot" id="foot"></p>
@@ -772,13 +874,14 @@ const DIAL=(()=>{
   const C=320, R_PLATE=314, R_RING_IN=266, R_RING_OUT=310, R_DISC=262, R_IN_OUT=186, R_IN_IN=150, R_HUB=136;
   const CFG={
     grav:{ ring:{min:0.1,max:10000,a0:-150,deg:60,unit:"l/s",title:"CAUDAL  l/s"},
-           disc:{deg:30,unit:"‰",title:"PENDIENTE ‰",ticks:[0.5,0.6,0.7,0.8,0.9,1,1.25,1.5,2,2.5,3,4,5,6,7,8,9,10,12.5,15,20,25,30,40,50,60,70,80,90,100],labels:[0.5,1,2,5,10,20,50,100]},
+           disc:{deg:30,unit:"‰",title:"PENDIENTE ‰",ticks:[0.5,0.6,0.7,0.8,0.9,1,1.25,1.5,2,2.5,3,4,5,6,7,8,9,10,12.5,15,20,25,30,40,50,60,70,80,90,100],labels:[0.5,1,2,5,10,20,50,100],labelsBig:[0.5,1,5,10,50,100]},
            input:"pend" },
     pres:{ ring:{min:0.01,max:1000,a0:-101,deg:40.5,unit:"m/km",title:"PÉRDIDA DE CARGA  m/km"},
            disc:{deg:77,unit:"l/s",title:"CAUDAL l/s",ticks:[0.3,0.4,0.5,0.6,0.8,1,1.5,2,3,4,5,6,8,10,15,20,25,30,40,50,60,80,100,150,200,250,300,400,500,600,800,1000,1500,2000,2500,3000],labels:[0.3,0.5,1,2,3,5,10,20,30,50,100,200,300,500,1000,2000,3000]},
            input:"pq" }
   };
-  const BIG=()=>window.matchMedia&&matchMedia("(max-width:600px)").matches;
+  // rótulos grandes cuando el dial se ve pequeño (móvil vertical u horizontal, ventanas estrechas), según su tamaño real en pantalla
+  const BIG=()=>{ const w=svg?svg.getBoundingClientRect().width:0; return w>0&&w<470; };
   let lastBig=null, svg=null, mode=null, phi=0, drag=null, marks=[], last=null;
   const rad=a=>(a-90)*Math.PI/180;
   const pt=(r,a)=>[C+r*Math.cos(rad(a)),C+r*Math.sin(rad(a))];
@@ -803,7 +906,7 @@ const DIAL=(()=>{
     return g; }
   function discScale(cf,off){ // escala de entrada impresa en el disco (gira con él)
     let g=`<circle cx="${C}" cy="${C}" r="${(R_IN_OUT+R_IN_IN)/2}" class="dl-inband" stroke-width="${R_IN_OUT-R_IN_IN}"/>`;
-    cf.ticks.forEach(v=>{ const a=-cf.deg*Math.log10(v), maj=cf.labels.includes(v); g+=line(R_IN_OUT,R_IN_OUT-(maj?13:7),a,maj?"dl-it maj":"dl-it"); if(maj) g+=text(...pt(R_IN_OUT-(BIG()?27:24),a),a,lab(v),"dl-il","middle",off); });
+    cf.ticks.forEach(v=>{ const a=-cf.deg*Math.log10(v), maj=(BIG()&&cf.labelsBig?cf.labelsBig:cf.labels).includes(v); g+=line(R_IN_OUT,R_IN_OUT-(maj?13:7),a,maj?"dl-it maj":"dl-it"); if(maj) g+=text(...pt(R_IN_OUT-(BIG()?27:24),a),a,lab(v),"dl-il","middle",off); });
     for(let i=0;i<72;i++){ const a=i*5; g+=`<circle cx="${pt(R_DISC-5,a)[0].toFixed(1)}" cy="${pt(R_DISC-5,a)[1].toFixed(1)}" r="1.6" class="dl-knurl"/>`; }
     return g; }
   function build(m){
@@ -848,7 +951,7 @@ const DIAL=(()=>{
       if(!x.sel&&(keep.some(k=>ov(k,r))||ov(wr,r))){ x.t.remove(); return; } keep.push(r); });
   }
   function setRot(){ svg.querySelector("#dl-disc").setAttribute("transform",`rotate(${phi.toFixed(3)} ${C} ${C})`); svg.querySelector("#dl-dscale").innerHTML=discScale(CFG[mode].disc,phi); }
-  function hub(h){ svg.querySelector("#dl-hub").innerHTML=`<circle cx="${C}" cy="${C}" r="${R_HUB}" class="dl-hubc"/><text x="${C}" y="${C-(BIG()?114:118)}" text-anchor="middle" class="dl-wtitle">▲ ${CFG[mode].disc.title}</text>`+h; }
+  function hub(h){ svg.querySelector("#dl-hub").innerHTML=`<circle cx="${C}" cy="${C}" r="${R_HUB}" class="dl-hubc"/><text x="${C}" y="${C-(BIG()?114:118)}" text-anchor="middle" class="dl-wtitle">${BIG()?"":"▲ "}${CFG[mode].disc.title}</text>`+h; }
   function hair(ang){ const hl=svg.querySelector("#dl-hair"); if(ang==null){ hl.style.display="none"; svg.querySelector("#dl-hairlab").innerHTML=""; return; } hl.style.display="";
     hl.setAttribute("transform",`rotate(${ang.toFixed(2)} ${C} ${C})`); }
   function section(f,dy=58){ // corte del tubo con el calado
@@ -871,10 +974,11 @@ const DIAL=(()=>{
       <text x="${C}" y="${C+Y.c}" text-anchor="middle" class="dl-h2">${nf(m.r.v,2)} m/s · ${fmtJ(J)} ‰</text>
       <text x="${C}" y="${C+Y.d}" text-anchor="middle" class="dl-h3 st-${m.st}">${{ok:"Dentro de criterio",warn:"Sin autolimpieza",crit:"Velocidad excesiva",fill:"Calado excesivo",dn:"DN < mínimo"}[m.st]}</text>
       ${section(f,Y.e)}<text x="${C}" y="${C+Y.f}" text-anchor="middle" class="dl-h2">h/D ${Math.round(f*100)} %${b?"":` · llena ${nf(full.Q,full.Q<10?2:0)} l/s`}</text>`:"");
-    numSync(J*1000,"Pendiente (‰)");
+    numSync(J*1000,"Pendiente (‰)"); ctl(`${p.label} · ${{res:"residuales",plu:"pluviales",uni:"unitaria"}[$("red").value]} · ${p.formula==="manning"?"Manning n "+nf(p.n,3):"Colebrook k "+nf(p.k,2)+" mm"}`);
     $("hprint").textContent=`${prod().name} ${row.s} · DN ${sel} · Criterio: ${p.label} (${{res:"residuales",plu:"pluviales",uni:"unitaria"}[$("red").value]}) · ${p.formula==="manning"?"Manning n = "+nf(p.n,3):"Colebrook k = "+nf(p.k,3)+" mm"} · pendiente ${fmtJ(J)} ‰ · calado ${Math.round(f*100)} %${parseFloat($("qdis").value)>0?" · Q de diseño "+$("qdis").value+" l/s":""} · ${new Date().toLocaleDateString("es-ES")}`;
     $("dialcap").textContent=`Gira el disco para fijar la pendiente en la ventana. Cada marca es un DN de ${prod().name} ${row.s}: apunta a su caudal en el anillo exterior con calado ${Math.round(f*100)} %.${qd>0&&(qd<cf.ring.min||qd>cf.ring.max)?` El caudal de diseño (${nf(qd,0)} l/s) queda fuera del anillo.`:""}${marks.some(x=>x.r.Q<cf.ring.min)?" Las marcas con ‹ están por debajo de 0,1 l/s.":""}`;
     if(m) live(`DN ${m.n}: ${nf(m.r.Q,1)} l/s, ${nf(m.r.v,2)} m/s con ${fmtJ(J)} ‰`);
+    bar(m?`DN ${m.n} · ${fmtJ(J)}‰ · ${nf(m.r.Q,m.r.Q<10?2:1)} l/s · ${nf(m.r.v,2)} m/s`:"—", m?m.st:"crit");
   }
   function drawPres(row,sel,p,Q,L){
     if(mode!=="pres"||lastBig!==BIG()) { lastBig=BIG(); build("pres"); } const cf=CFG.pres; phi=cf.disc.deg*Math.log10(Q); setRot();
@@ -892,10 +996,11 @@ const DIAL=(()=>{
       <text x="${C}" y="${C+Y.e}" text-anchor="middle" class="dl-h2">ΔH en ${nf(L,0)} m</text>
       <text x="${C}" y="${C+Y.f}" text-anchor="middle" class="dl-h1s">${nf(rs.J*L,2)} m · ${nf(rs.J*L/10.2,2)} bar</text>
       ${m?"":`<text x="${C}" y="${C+(b?114:92)}" text-anchor="middle" class="dl-h3 st-crit">DN ${sn} fuera de la escala</text>`}`);
-    numSync(Q,"Caudal (l/s)");
+    numSync(Q,"Caudal (l/s)"); ctl(`${p.formula==="hw"?"Hazen-Williams C "+nf(p.C,0):"Colebrook k "+nf(p.k,2)+" mm"} · tramo ${nf(L,0)} m · ${p.nu===1.31e-6?"10":"20"} °C · v ${nf(p.vmin,1)}–${nf(p.vmax,1)} m/s`);
     $("hprint").textContent=`${prod().name} ${row.s} · DN ${sel} · ${p.formula==="hw"?"Hazen-Williams C = "+nf(p.C,0):"Colebrook-White k = "+nf(p.k,3)+" mm"} · caudal ${nf(Q,Q<10?2:1)} l/s · tramo ${nf(L,0)} m · agua a ${p.nu===1.31e-6?"10":"20"} °C · v ${nf(p.vmin,1)}–${nf(p.vmax,1)} m/s · ${new Date().toLocaleDateString("es-ES")}`;
     $("dialcap").textContent=`Gira el disco para fijar el caudal en la ventana. Cada marca es un DN de ${prod().name} ${row.s}: apunta a su pérdida de carga en el anillo exterior. Color: velocidad dentro o fuera de ${nf(p.vmin,1)}–${nf(p.vmax,1)} m/s.${out.length?` Fuera de la escala de 0,01–1.000 m/km (no se dibujan): DN ${out.join(", ")}.`:""}`;
     live(`DN ${sn}: ${nf(rs.J*1000,2)} m/km, ${nf(rs.v,2)} m/s con ${nf(Q,Q<10?2:1)} l/s`);
+    bar(`DN ${sn} · ${nf(Q,Q<10?2:1)} l/s · ${nf(rs.J*1000,rs.J*1000<10?2:1)} m/km · ${nf(rs.v,2)} m/s`, sst);
   }
   function clear(msg){ if(!svg||!mode) return; svg.querySelector("#dl-marks").innerHTML=""; hair(null); hub(`<text x="${C}" y="${C}" text-anchor="middle" class="dl-h3 st-crit">${msg}</text>`); }
   function numSync(v,lab,force){ const el=$("dialval"); $("dialvallab").textContent=lab; if(force||document.activeElement!==el){ const d=mode==="grav"?(v<2?2:1):(v<10?2:v<100?1:0); el.value=nf(v,d); el.classList.remove("bad"); $("dialmsg").textContent=""; } }
@@ -910,6 +1015,8 @@ const DIAL=(()=>{
     f.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); f.dispatchEvent(new Event("change")); } });
     $("dialminus").addEventListener("click",()=>{ setValue(Math.max(nice(cur(),false),10**parseFloat($(CFG[mode].input).min))); numSync(cur(),$("dialvallab").textContent,true); });
     $("dialplus").addEventListener("click",()=>{ setValue(Math.min(nice(cur(),true),10**parseFloat($(CFG[mode].input).max))); numSync(cur(),$("dialvallab").textContent,true); }); }
+  function ctl(t){ const e=$("ctlsum"); if(e) e.textContent=t; }
+  function bar(t,st){ const b=$("hbar"); if(!b) return; b.innerHTML=`<i class="st-${st}"></i>${t}<span>↑</span>`; }
   let liveT=null; function live(t){ clearTimeout(liveT); liveT=setTimeout(()=>{ const el=$("dialsr"); if(el) el.textContent=t; },400); }
   // --- interacción ---
   const angOf=e=>{ const b=svg.getBoundingClientRect(); const x=(e.clientX-b.left)*640/b.width-C, y=(e.clientY-b.top)*640/b.height-C; return {a:Math.atan2(x,-y)*180/Math.PI, r:Math.hypot(x,y)}; };
@@ -920,7 +1027,7 @@ const DIAL=(()=>{
   function init(el){ svg=el; bindNum();
     // en táctil, el disco captura el gesto (el anillo y el centro siguen dejando desplazar la página)
     svg.addEventListener("touchstart",e=>{ if(!mode) return; const {r}=angOf(e.touches[0]); if(r<=R_DISC+6&&r>=R_HUB) e.preventDefault(); },{passive:false});
-    svg.addEventListener("pointerdown",e=>{ if(!mode) return; const {a,r}=angOf(e); if(r>R_DISC+6||r<R_HUB) return; e.preventDefault(); try{ svg.focus({preventScroll:true}); }catch(_){ svg.focus(); } svg.setPointerCapture(e.pointerId); drag={aPrev:a,acc:0,phi0:phi,moved:0,target:e.target.closest(".dl-mk")}; svg.classList.add("grab"); });
+    svg.addEventListener("pointerdown",e=>{ if(!mode) return; const {a,r}=angOf(e); if(r>R_DISC+6||r<R_HUB) return; e.preventDefault(); try{ svg.focus({preventScroll:true}); }catch(_){ svg.focus(); } try{ svg.setPointerCapture(e.pointerId); }catch(_){} drag={aPrev:a,acc:0,phi0:phi,moved:0,target:e.target.closest(".dl-mk")}; svg.classList.add("grab"); });
     // el giro se acumula entre movimientos (admite más de media vuelta) y se limita al rango de la escala
     svg.addEventListener("pointermove",e=>{ if(!drag) return; const {a}=angOf(e); let d=a-drag.aPrev; if(d>180) d-=360; if(d<-180) d+=360; drag.aPrev=a;
       const cf=CFG[mode], el=$(cf.input), lo=parseFloat(el.min)*cf.disc.deg-drag.phi0, hi=parseFloat(el.max)*cf.disc.deg-drag.phi0;
@@ -934,10 +1041,15 @@ const DIAL=(()=>{
   return {init,drawGrav,drawPres,clear,CFG,ringAng,get marks(){return marks;},get phi(){return phi;}};
 })();
 DIAL.init($("dial"));
-if(window.matchMedia){ const mq=matchMedia("(max-width:600px)"); (mq.addEventListener?mq.addEventListener("change",()=>render()):mq.addListener(()=>render())); }
+(function(){ const svg=$("dial"); let was=null; const chk=()=>{ const w=svg.getBoundingClientRect().width; if(!w) return; const big=w<470; svg.classList.toggle("big",big); if(was!==null&&was!==big) render(); was=big; };
+  if(window.ResizeObserver) new ResizeObserver(chk).observe(svg); else window.addEventListener("resize",chk); chk(); })();
+// barra de resultado fija en móvil: aparece cuando el dial sale de la pantalla
+(function(){ const bar=$("hbar"), dp=$("dialpanel"); if(!bar||!dp) return; bar.addEventListener("click",()=>dp.scrollIntoView({behavior:"smooth",block:"start"}));
+  if(window.IntersectionObserver) new IntersectionObserver(es=>es.forEach(e=>document.documentElement.classList.toggle("dial-out",!e.isIntersecting)),{threshold:0.15}).observe($("dial")); })();
 
 $("curvesbtn").addEventListener("click",()=>{ const on=document.documentElement.getAttribute("data-curves")!=="1"; document.documentElement.setAttribute("data-curves",on?"1":"0"); $("curvesbtn").setAttribute("aria-pressed",on); $("curvesbtn").textContent=on?"Ocultar curvas":"Ver también como curvas"; render(); });
 $("dialprint").addEventListener("click",()=>window.print());
+$("ctltoggle").addEventListener("click",()=>{ const o=document.documentElement.classList.toggle("ctl-open"); $("ctltoggle").setAttribute("aria-expanded",o); $("ctltoggle").querySelector("b").textContent=o?"▴":"▾"; });
 function render(){ ERR.length=0; document.querySelectorAll(".bad").forEach(e=>e.classList.remove("bad")); let out; try{ out=(MODE==="mec")?renderMec():(MODE==="pres")?renderPres():(MODE==="flow")?renderFlow():renderGrav(); } finally { showErrors(); if(ERR.length){ DIAL.clear("Corrige los datos marcados"); $("chart").innerHTML=""; $("charttitle").textContent="Sin resultado: corrige los datos"; $("results").innerHTML=`<div class="tile"><div class="k">Sin resultado</div><div class="v" style="font-family:Archivo;font-size:18px;color:var(--crit)">Corrige los datos marcados</div></div>`; $("table").innerHTML=""; } } return out; }
 function renderGrav(){
   const p=params(); const J=Math.pow(10,parseFloat($("pend").value))/1000; const f=parseInt($("fill").value)/100;
