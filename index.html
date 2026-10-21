@@ -9,19 +9,48 @@
 @media (prefers-color-scheme: dark){:root{--bg:#121821;--panel:#1B2331;--ink:#EEF1F6;--muted:#9AA6B8;--brand:#F04B3F;--line:#33405A}}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding:32px max(16px,env(safe-area-inset-left))}
 main{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 h1{margin:0;font-size:24px} h1 span{color:var(--brand)} p{margin:0;color:var(--muted)}
+h2{margin:12px 0 0;font-size:18px}
 a.card{display:block;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:6px;padding:16px 18px;color:var(--ink);text-decoration:none}
 a.card b{font-size:17px} a.card span{display:block;color:var(--muted);font-size:14px;margin-top:4px}
 footer{font-size:12.5px;color:var(--muted)}
+.langsw{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none;background:var(--panel)}
+.langsw button{font:700 12px system-ui,sans-serif;letter-spacing:.06em;border:0;background:transparent;color:var(--muted);padding:8px 14px;cursor:pointer}
+.langsw button.on{background:var(--brand);color:#fff}
 </style>
 </head>
 <body>
 <main>
-<h1>Ábacos <span>GPF</span></h1>
-<p>Grupo Plásticos Ferro · herramientas de cálculo en versión beta.</p>
-<a class="card" href="Abaco_Saneamiento_GPF.html"><b>Ábaco de saneamiento</b><span>Gravedad, caudal de diseño y cálculo mecánico de tubos sin presión</span></a>
-<a class="card" href="Abaco_Presion_GPF.html"><b>Ábaco de conducciones a presión</b><span>Pérdida de carga y cálculo mecánico con presión interior</span></a>
-<h2 style="margin:12px 0 0;font-size:18px">Todo en uno</h2><a class="card" href="Abaco_pro_Circular_GPF.html"><b>Ábaco_pro GPF</b><span>Gravedad, presión, caudal de diseño y cálculo mecánico en un solo ábaco circular</span></a><a class="card" href="Abaco_Hidraulico_Circular_GPF.html"><b>Ábaco Hidráulico GPF</b><span>Gravedad, presión y caudal de diseño, sin cálculo mecánico</span></a><p style="font-size:14px">Versión clásica con gráfico de curvas (sin adaptar al móvil): <a href="Abaco_pro_GPF.html">Ábaco_pro</a> · <a href="Abaco_Hidraulico_GPF.html">Ábaco Hidráulico</a></p><h2 style="margin:12px 0 0;font-size:18px">Vídeos de uso</h2><a class="card" href="videos/Video_Abaco_Saneamiento_GPF.mp4"><b>Cómo funciona el ábaco de saneamiento</b><span>5 min · cuatro ejemplos: colector, criterio EMASESA, caudal de diseño y cálculo mecánico</span></a><a class="card" href="videos/Video_Abaco_Presion_GPF.mp4"><b>Cómo funciona el ábaco de presión</b><span>4 min · cuatro ejemplos: abastecimiento, riego, curvas y cálculo mecánico</span></a><footer>Herramienta orientativa: no sustituye al cálculo justificativo del proyecto ni a la normativa del gestor.</footer>
+<div class="top"><h1 data-fr="Abaques <span>GPF</span>">Ábacos <span>GPF</span></h1>
+<div class="langsw" role="group" aria-label="Idioma · Langue"><button type="button" data-l="es" title="Castellano">ES</button><button type="button" data-l="fr" title="Français">FR</button></div></div>
+<p data-fr="Grupo Plásticos Ferro · outils de calcul en version bêta.">Grupo Plásticos Ferro · herramientas de cálculo en versión beta.</p>
+<a class="card" href="Abaco_Saneamiento_GPF.html"><b data-fr="Abaque d'assainissement">Ábaco de saneamiento</b><span data-fr="Gravitaire, débit de dimensionnement et calcul mécanique des tubes sans pression · inclut le tube multicouche CR8/CR16">Gravedad, caudal de diseño y cálculo mecánico de tubos sin presión · incluye el tubo multicapa CR8/CR16</span></a>
+<a class="card" href="Abaco_Presion_GPF.html"><b data-fr="Abaque des conduites sous pression">Ábaco de conducciones a presión</b><span data-fr="Perte de charge et calcul mécanique avec pression intérieure">Pérdida de carga y cálculo mecánico con presión interior</span></a>
+<h2 data-fr="Tout-en-un">Todo en uno</h2>
+<a class="card" href="Abaco_pro_Circular_GPF.html"><b data-fr="Abaque_pro GPF">Ábaco_pro GPF</b><span data-fr="Gravitaire, pression, débit de dimensionnement et calcul mécanique dans un seul abaque circulaire">Gravedad, presión, caudal de diseño y cálculo mecánico en un solo ábaco circular</span></a>
+<a class="card" href="Abaco_Hidraulico_Circular_GPF.html"><b data-fr="Abaque Hydraulique GPF">Ábaco Hidráulico GPF</b><span data-fr="Gravitaire, pression et débit de dimensionnement, sans calcul mécanique">Gravedad, presión y caudal de diseño, sin cálculo mecánico</span></a>
+<p style="font-size:14px"><span data-fr="Version classique avec graphique de courbes (non adaptée au mobile) :">Versión clásica con gráfico de curvas (sin adaptar al móvil):</span> <a href="Abaco_pro_GPF.html" data-fr="Abaque_pro">Ábaco_pro</a> · <a href="Abaco_Hidraulico_GPF.html" data-fr="Abaque Hydraulique">Ábaco Hidráulico</a></p>
+<h2 data-fr="Vidéos d'utilisation (en espagnol)">Vídeos de uso</h2>
+<a class="card" href="videos/Video_Abaco_Saneamiento_GPF.mp4"><b data-fr="Fonctionnement de l'abaque d'assainissement">Cómo funciona el ábaco de saneamiento</b><span data-fr="5 min · quatre exemples : collecteur, critère EMASESA, débit de dimensionnement et calcul mécanique">5 min · cuatro ejemplos: colector, criterio EMASESA, caudal de diseño y cálculo mecánico</span></a>
+<a class="card" href="videos/Video_Abaco_Presion_GPF.mp4"><b data-fr="Fonctionnement de l'abaque de pression">Cómo funciona el ábaco de presión</b><span data-fr="4 min · quatre exemples : adduction, irrigation, courbes et calcul mécanique">4 min · cuatro ejemplos: abastecimiento, riego, curvas y cálculo mecánico</span></a>
+<footer data-fr="Outil indicatif : il ne remplace ni la note de calcul du projet ni les prescriptions du gestionnaire du réseau.">Herramienta orientativa: no sustituye al cálculo justificativo del proyecto ni a la normativa del gestor.</footer>
 </main>
+<script>
+(function(){
+  const els=[...document.querySelectorAll('[data-fr]')]; els.forEach(e=>e.dataset.es=e.innerHTML);
+  let lang='es';
+  try{ const q=new URLSearchParams(location.search).get('lang'); const st=localStorage.getItem('gpf_lang');
+    lang=(q==='fr'||q==='es')?q:(st==='fr'||st==='es')?st:((navigator.language||'').toLowerCase().startsWith('fr')?'fr':'es'); }catch(e){}
+  function apply(){
+    document.documentElement.lang=lang; document.title=lang==='fr'?'Abaques GPF':'Ábacos GPF';
+    els.forEach(e=>{ e.innerHTML=lang==='fr'?e.dataset.fr:e.dataset.es; });
+    document.querySelectorAll('a[href$=".html"]').forEach(a=>{ a.href=a.getAttribute('href').split('?')[0]+'?lang='+lang; });
+    document.querySelectorAll('.langsw button').forEach(b=>{ const on=b.dataset.l===lang; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
+  }
+  document.querySelectorAll('.langsw button').forEach(b=>b.addEventListener('click',()=>{ lang=b.dataset.l; try{ localStorage.setItem('gpf_lang',lang); }catch(e){} try{ const u=new URL(location.href); u.searchParams.set('lang',lang); history.replaceState(null,'',u); }catch(e){} apply(); }));
+  apply();
+})();
+</script>
 </body>
 </html>
