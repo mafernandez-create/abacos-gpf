@@ -1,0 +1,34 @@
+{
+  "id": "abaco",
+  "estado": "espera",
+  "resumen": "Cálculo hidráulico en la web para ayudar a elegir la tubería de un proyecto.",
+  "queEs": "Una calculadora hidráulica que funciona en el navegador, sin instalar nada.",
+  "sirve": [
+    "Comprobar qué diámetro de tubería necesita una red.",
+    "Hacer un cálculo con productos GPF delante de una ingeniería, durante la visita."
+  ],
+  "beneficio": "Que quien redacta el proyecto tenga el cálculo con producto GPF a un clic.",
+  "para": "Prescriptores, ingenierías y comerciales.",
+  "hecho": [
+    "Dirección la incluyó en la Fase 1, solo en su versión web.",
+    "Ficha técnica entregada a Informática."
+  ],
+  "siguiente": [
+    "Ser la primera aplicación que se sube a los servidores de GPF, para estrenar el proceso con la más sencilla."
+  ],
+  "necesita": "Informática: que esté listo el alojamiento en los servidores de GPF.",
+  "hitos": [
+    [
+      "2026-10-02",
+      "Reunión con Informática.",
+      "Se explicó qué espacio hace falta en los servidores de GPF. Informática pidió fases y prioridades."
+    ],
+    [
+      "2026-10-05",
+      "Dirección la prioriza para la Fase 1.",
+      "Está entre las seis aplicaciones que suben primero a los servidores de GPF."
+    ]
+  ],
+  "actualizado": "2026-10-05",
+  "revisado": false
+}
